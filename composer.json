@@ -14,13 +14,13 @@
     },
     "autoload": {
         "psr-4": {
-            "MyComponent\\": "src/"
+            "Keboola\\FtpExtractor\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "MyComponent\\Tests\\": "tests/phpunit/",
-            "MyComponent\\FunctionalTests\\": "tests/functional/"
+            "Keboola\\FtpExtractor\\Tests\\": "tests/phpunit/",
+            "Keboola\\FtpExtractor\\FunctionalTests\\": "tests/phpunit/"
         }
     },
     "scripts": {

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace MyComponent;
+namespace Keboola\FtpExtractor;
 
 use Keboola\Component\BaseComponent;
 
-class Component extends BaseComponent
+class FtpExtractorComponent extends BaseComponent
 {
     public function run(): void
     {
