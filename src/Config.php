@@ -8,9 +8,18 @@ use Keboola\Component\Config\BaseConfig;
 
 class Config extends BaseConfig
 {
-    // @todo implement your custom getters
-    public function getFoo() : string
+    public function getConnectionConfig(): array
     {
-        return $this->getValue(['parameters', 'foo']);
+        return [
+            'host' => $this->getValue(['parameters', 'host']),
+            'username' => $this->getValue(['parameters', 'username']),
+            'password' => $this->getValue(['parameters', 'password']),
+            'port' => $this->getValue(['parameters', 'port']),
+        ];
+    }
+
+    public function getPathToCopy(): string
+    {
+        return $this->getValue(['parameters', 'path']);
     }
 }

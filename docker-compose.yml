@@ -14,4 +14,6 @@ services:
       FTP_USER_PASS: userpass
       FTP_USER_HOME: /home/ftpusers/
       PUBLICHOST: ftp
+    volumes:
+      - ./tests/ftpInitContent:/home/ftpusers
 
