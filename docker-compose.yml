@@ -5,3 +5,13 @@ services:
     volumes:
       - ./:/code
       - ./data:/data
+    links:
+      - ftp
+  ftp:
+    image: stilliard/pure-ftpd
+    environment:
+      FTP_USER_NAME: ftpuser
+      FTP_USER_PASS: userpass
+      FTP_USER_HOME: /home/ftpusers/
+      PUBLICHOST: ftp
+
