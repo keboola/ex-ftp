@@ -16,8 +16,28 @@ class ConfigDefinition extends BaseConfigDefinition
         /** @noinspection NullPointerExceptionInspection */
         $parametersNode
             ->children()
-                ->scalarNode('foo')
-                    ->defaultValue('baz')
+                ->scalarNode('host')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
+                ->scalarNode('username')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
+                ->scalarNode('password')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
+                ->scalarNode('path')
+                    ->isRequired()
+                    ->cannotBeEmpty()
+                ->end()
+                ->scalarNode('port')
+                    ->validate()
+                        ->ifTrue(function ($value) {
+                            return !is_numeric($value) || $value < 0 ||$value > 65536;
+                        })
+                        ->thenInvalid('Port must be positive integer between 1-65535')
                 ->end()
             ->end()
         ;

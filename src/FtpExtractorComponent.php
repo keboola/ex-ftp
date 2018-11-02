@@ -10,7 +10,18 @@ class FtpExtractorComponent extends BaseComponent
 {
     public function run(): void
     {
-        // @TODO implement
+        /** @var Config $config */
+        $config = $this->getConfig();
+        $ftpExtractor = new FtpExtractor($config);
+        $ftpExtractor->copyFiles(
+            $config->getPathToCopy(),
+            $this->getOutputDirectory()
+        );
+    }
+
+    private function getOutputDirectory(): string
+    {
+        return $this->getDataDir() . '/out/files/';
     }
 
     protected function getConfigClass(): string

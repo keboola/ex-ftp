@@ -21,7 +21,7 @@
     "autoload-dev": {
         "psr-4": {
             "Keboola\\FtpExtractor\\Tests\\": "tests/phpunit/",
-            "Keboola\\FtpExtractor\\FunctionalTests\\": "tests/phpunit/"
+            "Keboola\\FtpExtractor\\FunctionalTests\\": "tests/functional/"
         }
     },
     "scripts": {
