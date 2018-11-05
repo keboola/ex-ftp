@@ -12,11 +12,14 @@ class FtpExtractorComponent extends BaseComponent
     {
         /** @var Config $config */
         $config = $this->getConfig();
+        $registry = new FileStateRegistry($this->getDataDir());
         $ftpExtractor = new FtpExtractor($config);
-        $ftpExtractor->copyFiles(
+        $count = $ftpExtractor->copyFiles(
             $config->getPathToCopy(),
-            $this->getOutputDirectory()
+            $this->getOutputDirectory(),
+            $registry
         );
+        $this->getLogger()->info(printf("%d file(s) downloaded", $count));
     }
 
     private function getOutputDirectory(): string

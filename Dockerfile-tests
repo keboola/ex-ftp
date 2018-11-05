@@ -1,0 +1,4 @@
+FROM keboola/ex-ftp
+
+RUN pecl install xdebug
+RUN docker-php-ext-enable xdebug
