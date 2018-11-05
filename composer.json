@@ -2,7 +2,8 @@
     "require": {
         "php": "^7.1",
         "keboola/php-component": "^5.0",
-        "league/flysystem": "^1.0"
+        "league/flysystem": "^1.0",
+        "webmozart/glob": "^4.1"
     },
     "require-dev": {
         "jakub-onderka/php-parallel-lint": "^1.0",
