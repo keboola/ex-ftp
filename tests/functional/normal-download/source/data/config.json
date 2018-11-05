@@ -4,6 +4,7 @@
         "username": "ftpuser",
         "password": "userpass",
         "port": 21,
-        "path": "/"
+        "path": "/*/*",
+        "wildcard": true
     }
 }

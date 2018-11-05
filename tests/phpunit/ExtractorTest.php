@@ -25,7 +25,8 @@ class ExtractorTest extends TestCase
                 'username' => 'ftpuser',
                 'password' => 'userpass',
                 'port' => 21,
-                'path' => '/',
+                'path' => 'dir1/*',
+                'wildcard' => true,
             ],
         ];
 

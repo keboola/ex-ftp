@@ -32,6 +32,12 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->isRequired()
                     ->cannotBeEmpty()
                 ->end()
+                ->scalarNode('onlyNewFiles')
+                    ->defaultFalse()
+                ->end()
+                ->scalarNode('wildcard')
+                    ->defaultFalse()
+                ->end()
                 ->scalarNode('port')
                     ->validate()
                         ->ifTrue(function ($value) {
