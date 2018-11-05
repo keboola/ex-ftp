@@ -1,5 +1,11 @@
 version: '2'
 services:
+  app:
+    build: .
+    image: keboola/ex-ftp
+    command: composer ci
+    links:
+      - ftp
   dev:
     build: .
     volumes:
