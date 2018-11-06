@@ -9,9 +9,9 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 
 class ConfigDefinition extends BaseConfigDefinition
 {
-    public const CONNECTION_TYPE_FTP = 'ftp';
-    public const CONNECTION_TYPE_SSL_IMPLICIT = 'ssl-implicit';
-    public const CONNECTION_TYPE_SFTP = 'sftp';
+    public const CONNECTION_TYPE_FTP = 'FTP';
+    public const CONNECTION_TYPE_SSL_IMPLICIT = 'FTPS';
+    public const CONNECTION_TYPE_SFTP = 'SFTP';
 
     protected function getParametersDefinition(): ArrayNodeDefinition
     {
