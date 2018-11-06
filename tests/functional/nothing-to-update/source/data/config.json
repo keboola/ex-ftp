@@ -6,6 +6,7 @@
         "port": 21,
         "path": "/*/*",
         "wildcard": true,
-        "onlyNewFiles": true
+        "onlyNewFiles": true,
+        "connectionType" : "ftp"
     }
 }

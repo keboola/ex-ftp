@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor\Tests;
 
+use Keboola\FtpExtractor\ConfigDefinition;
 use Keboola\FtpExtractor\FtpExtractorComponent;
 use Keboola\Temp\Temp;
 use PHPUnit\Framework\TestCase;
@@ -27,6 +28,7 @@ class ExtractorTest extends TestCase
                 'port' => 21,
                 'path' => 'dir1/*',
                 'wildcard' => true,
+                'connectionType' => ConfigDefinition::CONNECTION_TYPE_FTP,
             ],
         ];
 
