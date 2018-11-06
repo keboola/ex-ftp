@@ -979,16 +979,16 @@
         },
         {
             "name": "keboola/datadir-tests",
-            "version": "2.2.1",
+            "version": "2.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/datadir-tests.git",
-                "reference": "b26f103117f84bb62edae514924c6c29b0c32828"
+                "reference": "5653b5f769bfe9252d6f3304e815e6014033ef81"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/datadir-tests/zipball/b26f103117f84bb62edae514924c6c29b0c32828",
-                "reference": "b26f103117f84bb62edae514924c6c29b0c32828",
+                "url": "https://api.github.com/repos/keboola/datadir-tests/zipball/5653b5f769bfe9252d6f3304e815e6014033ef81",
+                "reference": "5653b5f769bfe9252d6f3304e815e6014033ef81",
                 "shasum": ""
             },
             "require": {
@@ -1015,7 +1015,7 @@
                 "MIT"
             ],
             "description": "Tool for functional testing of Keboola Connection components",
-            "time": "2018-10-21T09:04:11+00:00"
+            "time": "2018-11-05T12:33:25+00:00"
         },
         {
             "name": "keboola/php-temp",

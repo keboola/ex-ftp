@@ -1,3 +1,5 @@
 /vendor
 /.idea
 /data
+/tests/functional/*/source/data/in/state.json
+/tests/functional/*/expected/data/out/state.json
