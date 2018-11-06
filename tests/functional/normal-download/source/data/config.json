@@ -5,6 +5,7 @@
         "password": "userpass",
         "port": 21,
         "path": "/*/*",
-        "wildcard": true
+        "wildcard": true,
+        "connectionType": "ftp"
     }
 }

@@ -18,6 +18,11 @@ class Config extends BaseConfig
         ];
     }
 
+    public function getConnectionType(): string
+    {
+        return $this->getValue(['parameters', 'connectionType']);
+    }
+
     public function getPathToCopy(): string
     {
         return $this->getValue(['parameters', 'path']);
@@ -31,5 +36,10 @@ class Config extends BaseConfig
     public function isWildcard(): bool
     {
         return $this->getValue(['parameters', 'wildcard']);
+    }
+
+    public function getPrivateKey(): string
+    {
+        return $this->getValue(['parameters', 'privateKey']);
     }
 }

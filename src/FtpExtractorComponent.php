@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor;
 
 use Keboola\Component\BaseComponent;
+use League\Flysystem\Filesystem;
 
 class FtpExtractorComponent extends BaseComponent
 {
@@ -13,7 +14,8 @@ class FtpExtractorComponent extends BaseComponent
         /** @var Config $config */
         $config = $this->getConfig();
         $registry = new FileStateRegistry($this->getDataDir());
-        $ftpExtractor = new FtpExtractor($config);
+        $ftpFs = new Filesystem(AdapterFactory::getAdapter($config));
+        $ftpExtractor = new FtpExtractor($config, $ftpFs);
         $count = $ftpExtractor->copyFiles(
             $config->getPathToCopy(),
             $this->getOutputDirectory(),

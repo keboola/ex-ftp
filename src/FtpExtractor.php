@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor;
 
 use League\Flysystem\Filesystem as FtpFilesystem;
-use League\Flysystem\Adapter\Ftp as Adapter;
 use Webmozart\Glob\Glob;
 
 class FtpExtractor
@@ -28,9 +27,9 @@ class FtpExtractor
      */
     private $isWildcard;
 
-    public function __construct(Config $config)
+    public function __construct(Config $config, FtpFilesystem $ftpFs)
     {
-        $this->ftpFilesystem = new FtpFilesystem(new Adapter($config->getConnectionConfig()));
+        $this->ftpFilesystem = $ftpFs;
         $this->onlyNewFiles = $config->isOnlyForNewFiles();
         $this->isWildcard = $config->isWildcard();
     }

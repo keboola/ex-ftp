@@ -9,6 +9,11 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 
 class ConfigDefinition extends BaseConfigDefinition
 {
+    public const CONNECTION_TYPE_FTP = 'ftp';
+    public const CONNECTION_TYPE_IMPLICIT = 'ssl-implicit';
+    public const CONNECTION_TYPE_EXPLICIT = 'ssl-explicit';
+    public const CONNECTION_TYPE_SFTP = 'sftp';
+
     protected function getParametersDefinition(): ArrayNodeDefinition
     {
         $parametersNode = parent::getParametersDefinition();
@@ -32,18 +37,27 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->isRequired()
                     ->cannotBeEmpty()
                 ->end()
-                ->scalarNode('onlyNewFiles')
+                ->booleanNode('onlyNewFiles')
                     ->defaultFalse()
                 ->end()
-                ->scalarNode('wildcard')
+                ->booleanNode('wildcard')
                     ->defaultFalse()
                 ->end()
-                ->scalarNode('port')
-                    ->validate()
-                        ->ifTrue(function ($value) {
-                            return !is_numeric($value) || $value < 0 ||$value > 65536;
-                        })
-                        ->thenInvalid('Port must be positive integer between 1-65535')
+                ->integerNode('port')
+                    ->min(1)->max(65535)
+                ->end()
+                ->scalarNode('connectionType')
+                    ->isRequired()
+                    ->validate()->ifNotInArray([
+                               self::CONNECTION_TYPE_FTP,
+                               self::CONNECTION_TYPE_EXPLICIT,
+                               self::CONNECTION_TYPE_IMPLICIT,
+                               self::CONNECTION_TYPE_SFTP,
+                            ])->thenInvalid('Connection type not recognized')
+                        ->end()
+                ->end()
+                ->scalarNode('privateKey')
+                    ->defaultNull()
                 ->end()
             ->end()
         ;
