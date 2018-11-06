@@ -16,8 +16,8 @@ class AdapterFactory
             case ConfigDefinition::CONNECTION_TYPE_FTP:
                 return static::createFtpAdapter($config);
                 break;
-            case ConfigDefinition::CONNECTION_TYPE_EXPLICIT:
-                return static::createSllFtpAdapter($config);
+            case ConfigDefinition::CONNECTION_TYPE_SSL_IMPLICIT:
+                return static::createSllFtpImplicitAdapter($config);
                 break;
             case ConfigDefinition::CONNECTION_TYPE_SFTP:
                 return static::createSftpAdapter($config);
@@ -35,7 +35,7 @@ class AdapterFactory
         );
     }
 
-    private static function createSllFtpAdapter(Config $config): AbstractAdapter
+    private static function createSllFtpImplicitAdapter(Config $config): AbstractAdapter
     {
         return new Ftp(
             $config->getConnectionConfig()
@@ -45,7 +45,7 @@ class AdapterFactory
 
     private static function createSftpAdapter(Config $config): AbstractAdapter
     {
-        if ($config->getPrivateKey() !== null) {
+        if ($config->getPrivateKey() === '') {
             return new SftpAdapter($config->getConnectionConfig());
         } else {
             return new SftpAdapter($config->getConnectionConfig()
