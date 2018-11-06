@@ -7,6 +7,6 @@
         "path": "/*/*",
         "wildcard": true,
         "onlyNewFiles": true,
-        "connectionType" : "ftp"
+        "connectionType" : "FTP"
     }
 }
