@@ -6,7 +6,7 @@ services:
   - docker
 
 before_script:
-  - export APP_IMAGE=ex-ftp
+  - export APP_IMAGE=keboola/ex-ftp
   - docker-compose -v
   - docker-compose build
   - docker-compose run app
