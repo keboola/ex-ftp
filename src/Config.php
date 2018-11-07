@@ -13,7 +13,7 @@ class Config extends BaseConfig
         return [
             'host' => $this->getValue(['parameters', 'host']),
             'username' => $this->getValue(['parameters', 'username']),
-            'password' => $this->getValue(['parameters', 'password']),
+            'password' => $this->getValue(['parameters', '#password']),
             'port' => $this->getValue(['parameters', 'port']),
         ];
     }
@@ -40,6 +40,6 @@ class Config extends BaseConfig
 
     public function getPrivateKey(): string
     {
-        return $this->getValue(['parameters', 'privateKey']);
+        return $this->getValue(['parameters', '#privateKey']);
     }
 }
