@@ -44,6 +44,7 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->end()
                 ->integerNode('port')
                     ->min(1)->max(65535)
+                    ->defaultValue(21)
                 ->end()
                 ->scalarNode('connectionType')
                     ->isRequired()
