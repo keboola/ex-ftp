@@ -6,7 +6,7 @@ services:
     command: composer ci
     links:
       - ftp
-  dev:
+  dev: &devConfig
     build: .
     volumes:
       - ./:/code
@@ -23,15 +23,8 @@ services:
     volumes:
       - ./tests/ftpInitContent:/home/ftpusers
   tests:
-      build:
-        context: .
-        dockerfile: Dockerfile-tests
-      volumes:
-        - ./:/code
-        - ./data:/data
+      <<: *devConfig
       environment:
         - XDEBUG_CONFIG=remote_enable=1 remote_mode=req remote_port=9000 remote_host=172.20.0.1 remote_connect_back=0
         - PHP_IDE_CONFIG=serverName=ex-ftp
-      links:
-        - ftp
 
