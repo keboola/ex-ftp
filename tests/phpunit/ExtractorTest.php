@@ -15,7 +15,7 @@ class ExtractorTest extends TestCase
 {
     public function testConnection(): void
     {
-        $temp = new Temp('ex-storage');
+        $temp = new Temp('ex-ftp');
         $temp->initRunFolder();
         $fs = new Filesystem();
 
