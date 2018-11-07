@@ -10,7 +10,7 @@ use Webmozart\Glob\Glob;
 class FtpExtractor
 {
     private const RECURSIVE_COPY = true;
-    private const IS_FILE = 'file';
+    private const FTP_FILETYPE_FILE = 'file';
 
     /**
      * @var FtpFilesystem
@@ -56,7 +56,7 @@ class FtpExtractor
                 continue;
             }
 
-            if ($item['type'] === self::IS_FILE) {
+            if ($item['type'] === self::FTP_FILETYPE_FILE) {
                 $downloadedCount += $this->downloadSingleFile($item['path'], $destinationPath, $registry);
             }
         }
