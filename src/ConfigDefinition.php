@@ -10,7 +10,7 @@ use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 class ConfigDefinition extends BaseConfigDefinition
 {
     public const CONNECTION_TYPE_FTP = 'FTP';
-    public const CONNECTION_TYPE_SSL_IMPLICIT = 'FTPS';
+    public const CONNECTION_TYPE_SSL_EXPLICIT = 'FTPS';
     public const CONNECTION_TYPE_SFTP = 'SFTP';
 
     protected function getParametersDefinition(): ArrayNodeDefinition
@@ -50,7 +50,7 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->isRequired()
                     ->validate()->ifNotInArray([
                                self::CONNECTION_TYPE_FTP,
-                               self::CONNECTION_TYPE_SSL_IMPLICIT,
+                               self::CONNECTION_TYPE_SSL_EXPLICIT,
                                self::CONNECTION_TYPE_SFTP,
                             ])->thenInvalid('Connection type not recognized')
                         ->end()

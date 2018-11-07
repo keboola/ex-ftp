@@ -38,7 +38,7 @@ class AdapterFactoryTest extends TestCase
         $this->assertInstanceOf(
             Ftp::class,
             AdapterFactory::getAdapter(
-                $this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SSL_IMPLICIT)
+                $this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT)
             )
         );
     }
