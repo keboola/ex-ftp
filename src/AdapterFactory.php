@@ -16,7 +16,7 @@ class AdapterFactory
             case ConfigDefinition::CONNECTION_TYPE_FTP:
                 return static::createFtpAdapter($config);
                 break;
-            case ConfigDefinition::CONNECTION_TYPE_SSL_IMPLICIT:
+            case ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT:
                 return static::createSslFtpImplicitAdapter($config);
                 break;
             case ConfigDefinition::CONNECTION_TYPE_SFTP:
