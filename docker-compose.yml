@@ -3,7 +3,6 @@ services:
   app:
     build: .
     image: keboola/ex-ftp
-    command: composer ci
     links:
       - ftp
   dev: &devConfig
