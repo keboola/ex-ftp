@@ -38,8 +38,7 @@ class AdapterFactory
     private static function createSllFtpImplicitAdapter(Config $config): AbstractAdapter
     {
         return new Ftp(
-            $config->getConnectionConfig()
-            + ['ssl' => true]
+            array_merge($config->getConnectionConfig(), ['ssl' => true])
         );
     }
 
@@ -48,8 +47,9 @@ class AdapterFactory
         if ($config->getPrivateKey() === '') {
             return new SftpAdapter($config->getConnectionConfig());
         } else {
-            return new SftpAdapter($config->getConnectionConfig()
-                + ['privateKey' => $config->getPrivateKey()]);
+            return new SftpAdapter(
+                array_merge($config->getConnectionConfig(), ['privateKey' => $config->getPrivateKey()])
+            );
         }
     }
 }
