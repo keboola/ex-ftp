@@ -17,7 +17,7 @@ class AdapterFactory
                 return static::createFtpAdapter($config);
                 break;
             case ConfigDefinition::CONNECTION_TYPE_SSL_IMPLICIT:
-                return static::createSllFtpImplicitAdapter($config);
+                return static::createSslFtpImplicitAdapter($config);
                 break;
             case ConfigDefinition::CONNECTION_TYPE_SFTP:
                 return static::createSftpAdapter($config);
@@ -35,7 +35,7 @@ class AdapterFactory
         );
     }
 
-    private static function createSllFtpImplicitAdapter(Config $config): AbstractAdapter
+    private static function createSslFtpImplicitAdapter(Config $config): AbstractAdapter
     {
         return new Ftp(
             array_merge($config->getConnectionConfig(), ['ssl' => true])
