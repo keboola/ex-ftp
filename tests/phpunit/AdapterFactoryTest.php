@@ -13,34 +13,24 @@ use PHPUnit\Framework\TestCase;
 
 class AdapterFactoryTest extends TestCase
 {
-    public function testGetFtpAdapter(): void
+    /**
+     * @dataProvider adapterConfigProvider
+     */
+    public function testGetFtpsImplicitAdapter(Config $config, string $expectedClass): void
     {
         $this->assertInstanceOf(
-            Ftp::class,
-            AdapterFactory::getAdapter(
-                $this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_FTP)
-            )
+            $expectedClass,
+            AdapterFactory::getAdapter($config)
         );
     }
 
-    public function testGetSftpAdapter(): void
+    public function adapterConfigProvider(): array
     {
-        $this->assertInstanceOf(
-            SftpAdapter::class,
-            AdapterFactory::getAdapter(
-                $this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SFTP)
-            )
-        );
-    }
-
-    public function testGetFtpsImplicitAdapter(): void
-    {
-        $this->assertInstanceOf(
-            Ftp::class,
-            AdapterFactory::getAdapter(
-                $this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT)
-            )
-        );
+        return [
+            [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_FTP), Ftp::class],
+            [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SFTP), SftpAdapter::class],
+            [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT), Ftp::class],
+        ];
     }
 
     private function provideTestConfig(string $connectionType): Config
