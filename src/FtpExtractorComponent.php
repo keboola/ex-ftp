@@ -15,7 +15,11 @@ class FtpExtractorComponent extends BaseComponent
         $config = $this->getConfig();
         $registry = new FileStateRegistry($this->getDataDir());
         $ftpFs = new Filesystem(AdapterFactory::getAdapter($config));
-        $ftpExtractor = new FtpExtractor($config, $ftpFs);
+        $ftpExtractor = new FtpExtractor(
+            $config->isOnlyForNewFiles(),
+            $config->isWildcard(),
+            $ftpFs
+        );
         $count = $ftpExtractor->copyFiles(
             $config->getPathToCopy(),
             $this->getOutputDirectory(),
