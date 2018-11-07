@@ -27,11 +27,11 @@ class FtpExtractor
      */
     private $isWildcard;
 
-    public function __construct(Config $config, FtpFilesystem $ftpFs)
+    public function __construct(bool $onlyNewFiles, bool $isWildcard, FtpFilesystem $ftpFs)
     {
         $this->ftpFilesystem = $ftpFs;
-        $this->onlyNewFiles = $config->isOnlyForNewFiles();
-        $this->isWildcard = $config->isWildcard();
+        $this->onlyNewFiles = $onlyNewFiles;
+        $this->isWildcard = $isWildcard;
     }
 
     public function copyFiles(string $sourcePath, string $destionationPath, FileStateRegistry $registry): int
