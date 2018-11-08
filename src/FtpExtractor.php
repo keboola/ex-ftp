@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
+use Keboola\Component\UserException;
 use League\Flysystem\Filesystem as FtpFilesystem;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Glob\Glob;
@@ -57,7 +58,12 @@ class FtpExtractor
     private function prepareToDownloadFolder(string $sourcePath, string $destinationPath): void
     {
         $basePath = Glob::getBasePath(GlobValidator::convertToAbsolute($sourcePath));
-        $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
+        try {
+            $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
+        } catch (\LogicException $e) {
+            throw new UserException($e->getMessage());
+        }
+
         foreach ($items as $item) {
             if ($this->isWildcard && !GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
                 continue;
