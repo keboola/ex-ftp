@@ -95,7 +95,7 @@ class FtpExtractor
     private function download(FileStateRegistry $registry): int
     {
         $cbTimestampSort = function (array $a, array $b) {
-            return intval($a[self::FILE_TIMESTAMP_KEY]) < intval($b[self::FILE_TIMESTAMP_KEY]);
+            return intval($a[self::FILE_TIMESTAMP_KEY]) > intval($b[self::FILE_TIMESTAMP_KEY]);
         };
         uasort($this->filesToDownload, $cbTimestampSort);
 
