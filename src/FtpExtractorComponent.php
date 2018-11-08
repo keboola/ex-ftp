@@ -13,7 +13,7 @@ class FtpExtractorComponent extends BaseComponent
     {
         /** @var Config $config */
         $config = $this->getConfig();
-        $registry = new FileStateRegistry($this->getDataDir());
+        $registry = new FileStateRegistry($this->getInputState());
         $ftpFs = new Filesystem(AdapterFactory::getAdapter($config));
         $ftpExtractor = new FtpExtractor(
             $config->isOnlyForNewFiles(),
@@ -24,6 +24,12 @@ class FtpExtractorComponent extends BaseComponent
             $config->getPathToCopy(),
             $this->getOutputDirectory(),
             $registry
+        );
+        $this->writeOutputStateToFile(
+            array_merge(
+                $this->getInputState(),
+                [FileStateRegistry::STATE_FILE_KEY => $registry->getFileStates()]
+            )
         );
         $this->getLogger()->info(printf("%d file(s) downloaded", $count));
     }
