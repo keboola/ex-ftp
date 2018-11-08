@@ -1,1 +1,8 @@
-{"dir1\/recursive.bin":1541170099}
+{
+    "ex-ftp-state": {
+        "newest-timestamp": 1541170099,
+        "last-timestamp-files": [
+            "dir1\/recursive.bin"
+        ]
+    }
+}

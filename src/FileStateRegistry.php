@@ -4,56 +4,64 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
-use Symfony\Component\Filesystem\Filesystem;
-
 class FileStateRegistry
 {
-    private const IN_STATE_FILE = '/in/state.json';
-    private const OUT_STATE_FILE = '/out/state.json';
+    public const STATE_FILE_KEY = 'ex-ftp-state';
+    public const NEWEST_TIMESTAMP_KEY = 'newest-timestamp';
+    public const FILES_WITH_NEWEST_TIMESTAMP_KEY = 'last-timestamp-files';
+
+    /**
+     * @var int
+     */
+    private $newestTimestamp;
 
     /**
      * @var array
      */
-    private $fileStates;
+    private $filesWithNewestTimestamp;
 
-    /**
-     * @var string
-     */
-    private $dataDir;
-
-    public function __construct(string $dataDir)
+    public function __construct(array $stateFile)
     {
-        $this->dataDir = $dataDir;
-        $this->fileStates = $this->parseInputState();
-    }
+        $this->newestTimestamp = 0;
+        $this->filesWithNewestTimestamp = [];
+        if (isset($stateFile[self::STATE_FILE_KEY])) {
+            $cfg = $stateFile[self::STATE_FILE_KEY];
 
-    private function parseInputState(): array
-    {
-        $inFile = $this->dataDir . self::IN_STATE_FILE;
-        if (file_exists($inFile)) {
-            return json_decode(file_get_contents($inFile), true);
+            if (isset($cfg[self::NEWEST_TIMESTAMP_KEY])) {
+                $this->newestTimestamp = $cfg[self::NEWEST_TIMESTAMP_KEY];
+            }
+
+            if (isset($cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY])) {
+                $this->filesWithNewestTimestamp = $cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY];
+            }
         }
-        return [];
     }
 
     public function shouldBeFileUpdated(string $remotePath, int $timestamp): bool
     {
-        if (!key_exists($remotePath, $this->fileStates)
-            || $this->fileStates[$remotePath] < $timestamp
-        ) {
-            return true;
+        if ($this->newestTimestamp < $timestamp) {
+            $this->newestTimestamp = $timestamp;
+            $this->filesWithNewestTimestamp = [];
         }
 
-        return false;
+        if ($timestamp < $this->newestTimestamp) {
+            return false;
+        }
+
+        if (in_array($remotePath, $this->filesWithNewestTimestamp)) {
+            return false;
+        }
+
+        $this->filesWithNewestTimestamp[] = $remotePath;
+
+        return true;
     }
 
-    public function saveFileTimestamp(string $remotePath, int $timestamp): void
+    public function getFileStates(): array
     {
-        $this->fileStates[$remotePath] = $timestamp;
-    }
-
-    public function saveState(): void
-    {
-        (new Filesystem())->dumpFile($this->dataDir . self::OUT_STATE_FILE, json_encode($this->fileStates));
+        return [
+            self::NEWEST_TIMESTAMP_KEY => $this->newestTimestamp,
+            self::FILES_WITH_NEWEST_TIMESTAMP_KEY => $this->filesWithNewestTimestamp,
+        ];
     }
 }

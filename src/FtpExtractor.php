@@ -41,8 +41,6 @@ class FtpExtractor
         } else {
             $cnt = $this->downloadSingleFile($sourcePath, $destionationPath, $registry);
         }
-
-        $registry->saveState();
         return $cnt;
     }
 
@@ -71,7 +69,6 @@ class FtpExtractor
             return 0;
         }
 
-        $registry->saveFileTimestamp($sourcePath, $timestamp);
         file_put_contents($destination, $this->ftpFilesystem->read($sourcePath));
         return 1;
     }
