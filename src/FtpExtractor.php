@@ -5,12 +5,16 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor;
 
 use League\Flysystem\Filesystem as FtpFilesystem;
+use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Glob\Glob;
 
 class FtpExtractor
 {
     private const RECURSIVE_COPY = true;
     private const FTP_FILETYPE_FILE = 'file';
+    private const FILE_DESTINATION_KEY = 'destination-path';
+    private const FILE_TIMESTAMP_KEY = 'timestamp';
+    private const FILE_SOURCE_KEY = 'source-path';
 
     /**
      * @var FtpFilesystem
@@ -27,49 +31,79 @@ class FtpExtractor
      */
     private $isWildcard;
 
+    /**
+     * @var array
+     */
+    private $filesToDownload;
+
     public function __construct(bool $onlyNewFiles, bool $isWildcard, FtpFilesystem $ftpFs)
     {
         $this->ftpFilesystem = $ftpFs;
         $this->onlyNewFiles = $onlyNewFiles;
         $this->isWildcard = $isWildcard;
+        $this->filesToDownload = [];
     }
 
     public function copyFiles(string $sourcePath, string $destionationPath, FileStateRegistry $registry): int
     {
         if ($this->isWildcard) {
-            $cnt = $this->downloadFolder($sourcePath, $destionationPath, $registry);
+            $this->prepareToDownloadFolder($sourcePath, $destionationPath);
         } else {
-            $cnt = $this->downloadSingleFile($sourcePath, $destionationPath, $registry);
+            $this->prepareToDownloadSingleFile($sourcePath, $destionationPath);
         }
-        return $cnt;
+        return $this->download($registry);
     }
 
-    private function downloadFolder(string $sourcePath, string $destinationPath, FileStateRegistry $registry): int
+    private function prepareToDownloadFolder(string $sourcePath, string $destinationPath): void
     {
         $basePath = Glob::getBasePath(GlobValidator::convertToAbsolute($sourcePath));
         $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
-        $downloadedCount = 0;
         foreach ($items as $item) {
             if ($this->isWildcard && !GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
                 continue;
             }
 
             if ($item['type'] === self::FTP_FILETYPE_FILE) {
-                $downloadedCount += $this->downloadSingleFile($item['path'], $destinationPath, $registry);
+                $this->prepareToDownloadSingleFile($item['path'], $destinationPath);
             }
         }
-        return $downloadedCount;
     }
 
-    private function downloadSingleFile(string $sourcePath, string $destinationPath, FileStateRegistry $registry): int
+    private function prepareToDownloadSingleFile(string $sourcePath, string $destinationPath): void
     {
         $destination = $destinationPath . '/' . strtr($sourcePath, ['/' => '-']);
         $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
-        if ($this->onlyNewFiles && !$registry->shouldBeFileUpdated($sourcePath, $timestamp)) {
-            return 0;
-        }
+        $this->filesToDownload[] = [
+            self::FILE_DESTINATION_KEY => $destination,
+            self::FILE_SOURCE_KEY => $sourcePath,
+            self::FILE_TIMESTAMP_KEY => $timestamp,
+        ];
+    }
 
-        file_put_contents($destination, $this->ftpFilesystem->read($sourcePath));
-        return 1;
+    private function download(FileStateRegistry $registry): int
+    {
+        $cbTimestampSort = function (array $a, array $b) {
+            return intval($a[self::FILE_TIMESTAMP_KEY]) < intval($b[self::FILE_TIMESTAMP_KEY]);
+        };
+        uasort($this->filesToDownload, $cbTimestampSort);
+
+        $fs = new Filesystem();
+        $downloadedFiles = 0;
+        foreach ($this->filesToDownload as $file) {
+            if ($this->onlyNewFiles
+                && !$registry->shouldBeFileUpdated(
+                    $file[self::FILE_SOURCE_KEY],
+                    $file[self::FILE_TIMESTAMP_KEY]
+                )
+            ) {
+                continue;
+            }
+            $fs->dumpFile(
+                $file[self::FILE_DESTINATION_KEY],
+                $this->ftpFilesystem->read($file[self::FILE_SOURCE_KEY])
+            );
+            $downloadedFiles++;
+        }
+        return $downloadedFiles;
     }
 }
