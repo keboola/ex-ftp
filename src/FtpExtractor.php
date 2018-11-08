@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor;
 
 use Keboola\Component\UserException;
+use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem as FtpFilesystem;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Glob\Glob;
@@ -61,7 +62,7 @@ class FtpExtractor
         try {
             $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
         } catch (\LogicException $e) {
-            throw new UserException($e->getMessage());
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
 
         foreach ($items as $item) {
@@ -78,7 +79,12 @@ class FtpExtractor
     private function prepareToDownloadSingleFile(string $sourcePath, string $destinationPath): void
     {
         $destination = $destinationPath . '/' . strtr($sourcePath, ['/' => '-']);
-        $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
+        try {
+            $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
+        } catch (FileNotFoundException $e) {
+            throw new UserException($e->getMessage(),$e->getCode(),$e);
+        }
+
         $this->filesToDownload[] = [
             self::FILE_DESTINATION_KEY => $destination,
             self::FILE_SOURCE_KEY => $sourcePath,
