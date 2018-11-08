@@ -82,7 +82,7 @@ class FtpExtractor
         try {
             $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
         } catch (FileNotFoundException $e) {
-            throw new UserException($e->getMessage(),$e->getCode(),$e);
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
 
         $this->filesToDownload[] = [
