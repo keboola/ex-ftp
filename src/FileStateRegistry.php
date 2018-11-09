@@ -32,7 +32,7 @@ class FileStateRegistry
             }
 
             if (isset($cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY])) {
-                $this->filesWithNewestTimestamp = intval($cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY]);
+                $this->filesWithNewestTimestamp = (array) $cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY];
             }
         }
     }
