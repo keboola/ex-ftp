@@ -31,7 +31,7 @@ class FtpExtractorComponent extends BaseComponent
                 [FileStateRegistry::STATE_FILE_KEY => $registry->getFileStates()]
             )
         );
-        $this->getLogger()->info(printf("%d file(s) downloaded", $count));
+        $this->getLogger()->info(sprintf("%d file(s) downloaded", $count));
     }
 
     private function getOutputDirectory(): string
