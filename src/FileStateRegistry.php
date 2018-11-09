@@ -28,11 +28,11 @@ class FileStateRegistry
             $cfg = $stateFile[self::STATE_FILE_KEY];
 
             if (isset($cfg[self::NEWEST_TIMESTAMP_KEY])) {
-                $this->newestTimestamp = $cfg[self::NEWEST_TIMESTAMP_KEY];
+                $this->newestTimestamp = intval($cfg[self::NEWEST_TIMESTAMP_KEY]);
             }
 
             if (isset($cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY])) {
-                $this->filesWithNewestTimestamp = $cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY];
+                $this->filesWithNewestTimestamp = intval($cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY]);
             }
         }
     }
