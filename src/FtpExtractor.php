@@ -61,6 +61,8 @@ class FtpExtractor
         $basePath = Glob::getBasePath(GlobValidator::convertToAbsolute($sourcePath));
         try {
             $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
+        } catch (\RuntimeException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
         } catch (\LogicException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
