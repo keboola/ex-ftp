@@ -10,6 +10,7 @@ use Keboola\FtpExtractor\ConfigDefinition;
 use League\Flysystem\Adapter\Ftp;
 use League\Flysystem\Sftp\SftpAdapter;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class AdapterFactoryTest extends TestCase
 {
@@ -31,6 +32,12 @@ class AdapterFactoryTest extends TestCase
             [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SFTP), SftpAdapter::class],
             [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT), Ftp::class],
         ];
+    }
+
+    public function testWrongConnectionType(): void
+    {
+        $this->expectException(InvalidConfigurationException::class);
+        $this->provideTestConfig("Blanka");
     }
 
     private function provideTestConfig(string $connectionType): Config
