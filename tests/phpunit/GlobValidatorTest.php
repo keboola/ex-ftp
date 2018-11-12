@@ -24,6 +24,9 @@ class GlobValidatorTest extends TestCase
             ['/files/data/test.txt', '/*/*/*.txt'],
             ['files/data/test.txt', '*/*/*.txt'],
             ['files/data/test.txt', '/*/data/test.*'],
+            ['files/data/test.txt', '/**/*'],
+            ['files/data/test.txt', 'files/data/test.txt'],
+            ['files/data/test.txt', '/files/data/test.txt'],
         ];
     }
 
