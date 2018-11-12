@@ -17,7 +17,6 @@ class FtpExtractorComponent extends BaseComponent
         $ftpFs = new Filesystem(AdapterFactory::getAdapter($config));
         $ftpExtractor = new FtpExtractor(
             $config->isOnlyForNewFiles(),
-            $config->isWildcard(),
             $ftpFs,
             $this->getLogger()
         );
