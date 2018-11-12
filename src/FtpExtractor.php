@@ -7,6 +7,7 @@ namespace Keboola\FtpExtractor;
 use Keboola\Component\UserException;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem as FtpFilesystem;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Glob\Glob;
 
@@ -38,12 +39,18 @@ class FtpExtractor
      */
     private $filesToDownload;
 
-    public function __construct(bool $onlyNewFiles, bool $isWildcard, FtpFilesystem $ftpFs)
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
+
+    public function __construct(bool $onlyNewFiles, bool $isWildcard, FtpFilesystem $ftpFs, LoggerInterface $logger)
     {
         $this->ftpFilesystem = $ftpFs;
         $this->onlyNewFiles = $onlyNewFiles;
         $this->isWildcard = $isWildcard;
         $this->filesToDownload = [];
+        $this->logger = $logger;
     }
 
     public function copyFiles(string $sourcePath, string $destinationPath, FileStateRegistry $registry): int
@@ -66,6 +73,7 @@ class FtpExtractor
         } catch (\LogicException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
+        $this->logger->info("Connected to host");
 
         foreach ($items as $item) {
             if ($this->isWildcard && !GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
@@ -76,6 +84,8 @@ class FtpExtractor
                 $this->prepareToDownloadSingleFile($item['path'], $destinationPath);
             }
         }
+
+        $this->logger->info(sprintf("Found %d file(s) to be downloaded", count($this->filesToDownload)));
     }
 
     private function prepareToDownloadSingleFile(string $sourcePath, string $destinationPath): void
@@ -112,6 +122,9 @@ class FtpExtractor
             ) {
                 continue;
             }
+
+            $this->logger->info(sprintf("Downloading file %s", $file[self::FILE_SOURCE_KEY]));
+
             try {
                 $fs->dumpFile(
                     $file[self::FILE_DESTINATION_KEY],
