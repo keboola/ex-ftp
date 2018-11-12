@@ -15,6 +15,7 @@ class Config extends BaseConfig
             'username' => $this->getValue(['parameters', 'username']),
             'password' => $this->getValue(['parameters', '#password']),
             'port' => $this->getValue(['parameters', 'port']),
+            'timeout' => $this->getValue(['parameters', 'timeout']),
         ];
     }
 

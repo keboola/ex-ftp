@@ -67,6 +67,10 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->scalarNode('#privateKey')
                     ->defaultValue('')
                 ->end()
+                ->integerNode('timeout')
+                    ->min(1)
+                    ->defaultValue(10)
+                ->end()
             ->end()
         ;
         // @formatter:on
