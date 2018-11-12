@@ -45,11 +45,24 @@ class AdapterFactory
     private static function createSftpAdapter(Config $config): AbstractAdapter
     {
         if ($config->getPrivateKey() === '') {
-            return new SftpAdapter($config->getConnectionConfig());
+            $adapter = new SftpAdapter($config->getConnectionConfig());
         } else {
-            return new SftpAdapter(
+            $adapter =new  SftpAdapter(
                 array_merge($config->getConnectionConfig(), ['privateKey' => $config->getPrivateKey()])
             );
         }
+        static::setSftpRoot($adapter, $config->getPathToCopy());
+        return $adapter;
+    }
+
+
+    private static function setSftpRoot(SftpAdapter $adapter, string $sourcePath): void
+    {
+        if (substr($sourcePath, 0, 1) === '/') {
+            return;
+        }
+
+        $pwd = $adapter->getConnection()->pwd();
+        $adapter->setRoot($pwd);
     }
 }
