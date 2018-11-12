@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
+use Keboola\Component\UserException;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Adapter\Ftp;
 use League\Flysystem\Sftp\SftpAdapter;
@@ -47,7 +48,7 @@ class AdapterFactory
         if ($config->getPrivateKey() === '') {
             $adapter = new SftpAdapter($config->getConnectionConfig());
         } else {
-            $adapter =new  SftpAdapter(
+            $adapter = new  SftpAdapter(
                 array_merge($config->getConnectionConfig(), ['privateKey' => $config->getPrivateKey()])
             );
         }
@@ -55,14 +56,16 @@ class AdapterFactory
         return $adapter;
     }
 
-
     private static function setSftpRoot(SftpAdapter $adapter, string $sourcePath): void
     {
         if (substr($sourcePath, 0, 1) === '/') {
             return;
         }
-
-        $pwd = $adapter->getConnection()->pwd();
-        $adapter->setRoot($pwd);
+        try {
+            $pwd = $adapter->getConnection()->pwd();
+            $adapter->setRoot($pwd);
+        } catch (\RuntimeException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        }
     }
 }
