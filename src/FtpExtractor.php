@@ -46,12 +46,12 @@ class FtpExtractor
         $this->filesToDownload = [];
     }
 
-    public function copyFiles(string $sourcePath, string $destionationPath, FileStateRegistry $registry): int
+    public function copyFiles(string $sourcePath, string $destinationPath, FileStateRegistry $registry): int
     {
         if ($this->isWildcard) {
-            $this->prepareToDownloadFolder($sourcePath, $destionationPath);
+            $this->prepareToDownloadFolder($sourcePath, $destinationPath);
         } else {
-            $this->prepareToDownloadSingleFile($sourcePath, $destionationPath);
+            $this->prepareToDownloadSingleFile($sourcePath, $destinationPath);
         }
         return $this->download($registry);
     }
