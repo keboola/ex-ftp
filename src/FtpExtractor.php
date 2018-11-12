@@ -110,10 +110,14 @@ class FtpExtractor
             ) {
                 continue;
             }
-            $fs->dumpFile(
-                $file[self::FILE_DESTINATION_KEY],
-                $this->ftpFilesystem->read($file[self::FILE_SOURCE_KEY])
-            );
+            try {
+                $fs->dumpFile(
+                    $file[self::FILE_DESTINATION_KEY],
+                    $this->ftpFilesystem->read($file[self::FILE_SOURCE_KEY])
+                );
+            } catch (FileNotFoundException $e) {
+                throw new UserException("Error while trying to download file: " . $e->getMessage());
+            }
             $downloadedFiles++;
         }
         return $downloadedFiles;
