@@ -30,11 +30,6 @@ class FtpExtractor
     private $onlyNewFiles;
 
     /**
-     * @var bool
-     */
-    private $isWildcard;
-
-    /**
      * @var array
      */
     private $filesToDownload;
@@ -44,22 +39,17 @@ class FtpExtractor
      */
     private $logger;
 
-    public function __construct(bool $onlyNewFiles, bool $isWildcard, FtpFilesystem $ftpFs, LoggerInterface $logger)
+    public function __construct(bool $onlyNewFiles, FtpFilesystem $ftpFs, LoggerInterface $logger)
     {
         $this->ftpFilesystem = $ftpFs;
         $this->onlyNewFiles = $onlyNewFiles;
-        $this->isWildcard = $isWildcard;
         $this->filesToDownload = [];
         $this->logger = $logger;
     }
 
     public function copyFiles(string $sourcePath, string $destinationPath, FileStateRegistry $registry): int
     {
-        if ($this->isWildcard) {
-            $this->prepareToDownloadFolder($sourcePath, $destinationPath);
-        } else {
-            $this->prepareToDownloadSingleFile($sourcePath, $destinationPath);
-        }
+        $this->prepareToDownloadFolder($sourcePath, $destinationPath);
         return $this->download($registry);
     }
 
@@ -76,7 +66,7 @@ class FtpExtractor
         $this->logger->info("Connected to host");
 
         foreach ($items as $item) {
-            if ($this->isWildcard && !GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
+            if (!GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
                 continue;
             }
 
