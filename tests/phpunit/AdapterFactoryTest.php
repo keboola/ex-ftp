@@ -42,7 +42,7 @@ class AdapterFactoryTest extends TestCase
                     'username' => 'ftpuser',
                     '#password' => 'userpass',
                     'port' => 21,
-                    'path' => 'dir1/*',
+                    'path' => '/absolute/path/*',
                     'wildcard' => true,
                     'connectionType' => $connectionType,
                 ],
