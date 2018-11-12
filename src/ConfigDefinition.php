@@ -52,7 +52,16 @@ class ConfigDefinition extends BaseConfigDefinition
                                self::CONNECTION_TYPE_FTP,
                                self::CONNECTION_TYPE_SSL_EXPLICIT,
                                self::CONNECTION_TYPE_SFTP,
-                            ])->thenInvalid('Connection type not recognized')
+                            ])->thenInvalid(
+                                sprintf(
+                                    'Connection type must be one of %s.',
+                                    implode(', ', [
+                                        self::CONNECTION_TYPE_FTP,
+                                        self::CONNECTION_TYPE_SSL_EXPLICIT,
+                                        self::CONNECTION_TYPE_SFTP,
+                                    ])
+                                )
+                            )
                         ->end()
                 ->end()
                 ->scalarNode('#privateKey')
