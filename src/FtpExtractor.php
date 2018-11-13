@@ -62,6 +62,8 @@ class FtpExtractor
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         } catch (\LogicException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (\ErrorException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
         $this->logger->info("Connected to host");
 

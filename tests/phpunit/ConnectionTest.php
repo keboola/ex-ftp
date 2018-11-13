@@ -84,6 +84,13 @@ class ConnectionTest extends TestCase
                 'password' => 'marley',
                 'port' => 22,
             ])],
+            [new SftpAdapter([
+                'host' => 'non-existing-host.keboola',
+                'username' => 'bob',
+                'password' => 'marley',
+                'port' => 220,
+                'path' => 'non-exists',
+            ])],
             [new Ftp([
                 'host' => 'non-existing-host.keboola',
                 'username' => 'bob',
