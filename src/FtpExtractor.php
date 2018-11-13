@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor;
 
 use Keboola\Component\UserException;
+use League\Flysystem\Adapter\Ftp;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem as FtpFilesystem;
 use Psr\Log\LoggerInterface;
@@ -78,6 +79,11 @@ class FtpExtractor
         }
 
         $this->logger->info(sprintf("Found %d file(s) to be downloaded", count($this->filesToDownload)));
+        if ($this->ftpFilesystem->getAdapter() instanceof Ftp) {
+            /** @var Ftp $adapter */
+            $adapter = $this->ftpFilesystem->getAdapter();
+            @ftp_close($adapter->getConnection());
+        }
     }
 
     private function prepareToDownloadSingleFile(string $sourcePath, string $destinationPath): void
