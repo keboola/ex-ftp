@@ -82,7 +82,7 @@ class FtpExtractor
         if ($this->ftpFilesystem->getAdapter() instanceof Ftp) {
             /** @var Ftp $adapter */
             $adapter = $this->ftpFilesystem->getAdapter();
-            @ftp_close($adapter->getConnection());
+            @$adapter->disconnect();
         }
     }
 
