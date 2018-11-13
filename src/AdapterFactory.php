@@ -66,6 +66,8 @@ class AdapterFactory
             $adapter->setRoot($pwd);
         } catch (\RuntimeException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (\LogicException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }
