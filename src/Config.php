@@ -34,10 +34,6 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', 'onlyNewFiles']);
     }
 
-    public function isWildcard(): bool
-    {
-        return $this->getValue(['parameters', 'wildcard']);
-    }
 
     public function getPrivateKey(): string
     {
