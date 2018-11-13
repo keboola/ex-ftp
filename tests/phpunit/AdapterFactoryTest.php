@@ -50,7 +50,6 @@ class AdapterFactoryTest extends TestCase
                     '#password' => 'userpass',
                     'port' => 21,
                     'path' => '/absolute/path/*',
-                    'wildcard' => true,
                     'connectionType' => $connectionType,
                 ],
             ],

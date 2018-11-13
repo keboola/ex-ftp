@@ -39,7 +39,6 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->booleanNode('onlyNewFiles')
                     ->defaultFalse()
                 ->end()
-                ->end()
                 ->integerNode('port')
                     ->min(1)->max(65535)
                     ->defaultValue(21)
