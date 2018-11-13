@@ -68,6 +68,8 @@ class AdapterFactory
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         } catch (\LogicException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (\ErrorException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
     }
 }
