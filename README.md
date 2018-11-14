@@ -48,7 +48,6 @@ Configuration to download files by glob syntax:
             "port": 21,
             "path": "/dir1/*.csv",
             "connectionType": "FTP",
-            "wildCard": true
         }
     } 
     
@@ -64,8 +63,39 @@ Configuration to download only new files by glob syntax:
             "port": 21, 
             "path": "/dir1/*.csv",
             "connectionType": "FTP",
-            "wildCard": true,
             "onlyNewFiles": true
+        }
+    } 
+``` 
+Configuration to download only new *.csv files by glob syntax from SFTP server:
+(you need to use relative path)
+
+```json
+    {
+        "parameters": {
+            "host":"ftp.example.com",
+            "username": "ftpuser",
+            "password": "userpass",
+            "port": 22, 
+            "path": "**/*.csv",
+            "connectionType": "SFTP",
+            "onlyNewFiles": true
+        }
+    } 
+``` 
+
+Configuration to download exact file on SFTP server
+(you need to use relative path)
+
+```json
+    {
+        "parameters": {
+            "host":"ftp.example.com",
+            "username": "ftpuser",
+            "password": "userpass",
+            "port": 22, 
+            "path": "files/data.csv",
+            "connectionType": "SFTP"
         }
     } 
 ``` 
