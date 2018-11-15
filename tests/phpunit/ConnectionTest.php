@@ -24,7 +24,6 @@ class ConnectionTest extends TestCase
      */
     public function testFalseConnection(AdapterInterface $adapter): void
     {
-
         $fs = new Filesystem($adapter);
 
         $extractor = new FtpExtractor(false, $fs, new NullLogger());
@@ -55,54 +54,68 @@ class ConnectionTest extends TestCase
         $extractor->copyFiles('source', 'destination', new FileStateRegistry([]));
     }
 
+
     public function falseConnectionProvider(): array
     {
-
         return [
-            [new Ftp([
-                'host' => 'localhost',
-                'username' => 'bob',
-                'password' => 'marley',
-                'port' => 21,
-            ])],
-            [new Ftp([
-                'host' => 'localhost',
-                'username' => 'bob',
-                'password' => 'marley',
-                'port' => 21,
-                'ssl' => 1,
-            ])],
-            [new SftpAdapter([
-                'host' => 'localhost',
-                'username' => 'bob',
-                'password' => 'marley',
-                'port' => 22,
-            ])],
-            [new SftpAdapter([
-                'host' => 'non-existing-host.keboola',
-                'username' => 'bob',
-                'password' => 'marley',
-                'port' => 22,
-            ])],
-            [new SftpAdapter([
-                'host' => 'non-existing-host.keboola',
-                'username' => 'bob',
-                'password' => 'marley',
-                'port' => 220,
-                'path' => 'non-exists',
-            ])],
-            [new Ftp([
-                'host' => 'non-existing-host.keboola',
-                'username' => 'bob',
-                'password' => 'marley',
-                'port' => 21,
-            ])],
-            [new Ftp([
-                'host' => 'non-existing-host.keboola',
-                'username' => 'bob',
-                'password' => 'marley',
-                'port' => 50000,
-            ])],
+            'ftp-non-existing-server' => [
+                new Ftp([
+                    'host' => 'localhost',
+                    'username' => 'bob',
+                    'password' => 'marley',
+                    'port' => 21,
+                ]),
+            ],
+            'ftps-non-existing-server' => [
+                new Ftp([
+                    'host' => 'localhost',
+                    'username' => 'bob',
+                    'password' => 'marley',
+                    'port' => 21,
+                    'ssl' => 1,
+                ]),
+            ],
+            'sftp-non-existing-server' => [
+                new SftpAdapter([
+                    'host' => 'localhost',
+                    'username' => 'bob',
+                    'password' => 'marley',
+                    'port' => 22,
+                ]),
+            ],
+            'sftp-non-existing-host' => [
+                new SftpAdapter([
+                    'host' => 'non-existing-host.keboola',
+                    'username' => 'bob',
+                    'password' => 'marley',
+                    'port' => 22,
+                ]),
+            ],
+            'sftp-non-existing-server-and-port' => [
+                new SftpAdapter([
+                    'host' => 'non-existing-host.keboola',
+                    'username' => 'bob',
+                    'password' => 'marley',
+                    'port' => 220,
+                    'path' => 'non-exists',
+                ]),
+            ],
+            'ftp-non-existing-host' => [
+                new Ftp([
+                    'host' => 'non-existing-host.keboola',
+                    'username' => 'bob',
+                    'password' => 'marley',
+                    'port' => 21,
+                ]),
+            ],
+            'ftp-non-existing-host-and-port' => [
+                new Ftp([
+                    'host' => 'non-existing-host.keboola',
+                    'username' => 'bob',
+                    'password' => 'marley',
+                    'port' => 50000,
+                ]),
+            ],
         ];
     }
 }
