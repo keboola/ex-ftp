@@ -79,11 +79,6 @@ class FtpExtractor
         }
 
         $this->logger->info(sprintf("Found %d file(s) to be downloaded", count($this->filesToDownload)));
-        if ($this->ftpFilesystem->getAdapter() instanceof Ftp) {
-            /** @var Ftp $adapter */
-            $adapter = $this->ftpFilesystem->getAdapter();
-            @$adapter->disconnect();
-        }
     }
 
     private function prepareToDownloadSingleFile(string $sourcePath, string $destinationPath): void
