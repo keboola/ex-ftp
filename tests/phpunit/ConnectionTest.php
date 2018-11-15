@@ -5,9 +5,6 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor\Tests;
 
 use Keboola\Component\UserException;
-use Keboola\FtpExtractor\AdapterFactory;
-use Keboola\FtpExtractor\Config;
-use Keboola\FtpExtractor\ConfigDefinition;
 use Keboola\FtpExtractor\FileStateRegistry;
 use Keboola\FtpExtractor\FtpExtractor;
 use League\Flysystem\Adapter\Ftp;
@@ -20,7 +17,7 @@ use Psr\Log\NullLogger;
 class ConnectionTest extends TestCase
 {
     /**
-     * @dataProvider falseConnectionProvider
+     * @dataProvider invalidConnectionProvider
      */
     public function testFalseConnection(AdapterInterface $adapter): void
     {
@@ -28,34 +25,14 @@ class ConnectionTest extends TestCase
 
         $extractor = new FtpExtractor(false, $fs, new NullLogger());
         $this->expectException(UserException::class);
-        $extractor->copyFiles('source', 'destination', new FileStateRegistry([]));
-    }
-
-    public function testFalseSftpConnection(): void
-    {
-        $config = new Config(
-            [
-                'parameters' => [
-                    'host' => 'ftp',
-                    'username' => 'ftpuser',
-                    '#password' => 'userpass',
-                    'port' => 21,
-                    'path' => 'abs',
-                    'connectionType' => 'SFTP',
-                    'timeout' => 1,
-                ],
-            ],
-            new ConfigDefinition()
+        $this->expectExceptionMessageRegExp(
+            '/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)/'
         );
-        $this->expectException(UserException::class);
-        $adapter = AdapterFactory::getAdapter($config);
-        $fs = new Filesystem($adapter);
-        $extractor = new FtpExtractor(false, $fs, new NullLogger());
         $extractor->copyFiles('source', 'destination', new FileStateRegistry([]));
     }
 
 
-    public function falseConnectionProvider(): array
+    public function invalidConnectionProvider(): array
     {
         return [
             'ftp-non-existing-server' => [

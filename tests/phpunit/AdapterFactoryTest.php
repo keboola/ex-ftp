@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor\Tests;
 
+use Keboola\Component\UserException;
 use Keboola\FtpExtractor\AdapterFactory;
 use Keboola\FtpExtractor\Config;
 use Keboola\FtpExtractor\ConfigDefinition;
@@ -38,6 +39,27 @@ class AdapterFactoryTest extends TestCase
     {
         $this->expectException(InvalidConfigurationException::class);
         $this->provideTestConfig("Blanka");
+    }
+
+    public function testInvalidSftpAdapterWithRelativePath(): void
+    {
+        $config = new Config(
+            [
+                'parameters' => [
+                    'host' => 'ftp',
+                    'username' => 'ftpuser',
+                    '#password' => 'userpass',
+                    'port' => 21,
+                    'path' => 'rel',
+                    'connectionType' => 'SFTP',
+                    'timeout' => 1,
+                ],
+            ],
+            new ConfigDefinition()
+        );
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessageRegExp('/Could not login/');
+        AdapterFactory::getAdapter($config);
     }
 
     private function provideTestConfig(string $connectionType): Config
