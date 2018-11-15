@@ -16,6 +16,8 @@ The configuration requires following properties:
 - `username` - string (required): User with correct access rights
 - `password` - string (required): Password for given User
 - `path` - string (required): Path to specific file or glob syntax path
+    - FTP(s) uses absolute path
+    - SFTP uses relative path according to user's HOME directory
 - `connectionType` - string (required): Type of connection (possible value [FTP|FTPS|SFTP])
 - `privateKey` - string (optional): Possible to use only with SFTP connectionType.
 - `wildcard` - boolean (optional): TRUE if path is glob syntax (default FALSE)
@@ -29,7 +31,7 @@ Configuration to download specific file:
         "parameters": {
             "host":"ftp.example.com",
             "username": "ftpuser",
-            "password": "userpass",
+            "#password": "userpass",
             "port": 21,
             "path": "/dir1/file.csv",
             "connectionType": "FTP"
@@ -44,7 +46,7 @@ Configuration to download files by glob syntax:
         "parameters": {
             "host":"ftp.example.com",
             "username": "ftpuser",
-            "password": "userpass",
+            "#password": "userpass",
             "port": 21,
             "path": "/dir1/*.csv",
             "connectionType": "FTP",
@@ -59,7 +61,7 @@ Configuration to download only new files by glob syntax:
         "parameters": {
             "host":"ftp.example.com",
             "username": "ftpuser",
-            "password": "userpass",
+            "#password": "userpass",
             "port": 21, 
             "path": "/dir1/*.csv",
             "connectionType": "FTP",
@@ -75,7 +77,7 @@ Configuration to download only new *.csv files by glob syntax from SFTP server:
         "parameters": {
             "host":"ftp.example.com",
             "username": "ftpuser",
-            "password": "userpass",
+            "#password": "userpass",
             "port": 22, 
             "path": "**/*.csv",
             "connectionType": "SFTP",
@@ -92,7 +94,7 @@ Configuration to download exact file on SFTP server
         "parameters": {
             "host":"ftp.example.com",
             "username": "ftpuser",
-            "password": "userpass",
+            "#password": "userpass",
             "port": 22, 
             "path": "files/data.csv",
             "connectionType": "SFTP"
