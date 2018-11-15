@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor;
 
 use Keboola\Component\UserException;
-use League\Flysystem\Adapter\Ftp;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem as FtpFilesystem;
 use Psr\Log\LoggerInterface;
@@ -100,7 +99,7 @@ class FtpExtractor
     private function download(FileStateRegistry $registry): int
     {
         $cbTimestampSort = function (array $a, array $b) {
-            return intval($a[self::FILE_TIMESTAMP_KEY]) > intval($b[self::FILE_TIMESTAMP_KEY]);
+            return intval($a[self::FILE_TIMESTAMP_KEY]) <=> intval($b[self::FILE_TIMESTAMP_KEY]);
         };
         uasort($this->filesToDownload, $cbTimestampSort);
 
