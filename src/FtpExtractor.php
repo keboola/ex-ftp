@@ -14,7 +14,6 @@ use Webmozart\Glob\Glob;
 class FtpExtractor
 {
     private const RECURSIVE_COPY = true;
-    private const FTP_FILETYPE_FILE = 'file';
     private const FILE_DESTINATION_KEY = 'destination-path';
     private const FILE_TIMESTAMP_KEY = 'timestamp';
     private const FILE_SOURCE_KEY = 'source-path';
@@ -56,9 +55,21 @@ class FtpExtractor
 
     private function prepareToDownloadFolder(string $sourcePath, string $destinationPath): void
     {
-        $basePath = Glob::getBasePath(GlobValidator::convertToAbsolute($sourcePath));
+        $absSourcePath = GlobValidator::convertToAbsolute($sourcePath); //because Glob work with absolute paths
+
         try {
-            $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
+            $items = [];
+            if (Glob::getStaticPrefix($absSourcePath) === $absSourcePath) { //means is file
+                $file = $this->ftpFilesystem->get($absSourcePath);
+                $items[] = [
+                    'path' => $file->getPath(),
+                    'type' => ($file->isFile())? ItemFilter::FTP_FILETYPE_FILE:'',
+                ];
+            } else { //means is glob based path
+                $basePath = Glob::getBasePath($absSourcePath);
+                $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
+            }
+            $items = ItemFilter::getOnlyFiles($items);
         } catch (\RuntimeException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         } catch (\LogicException $e) {
@@ -85,11 +96,10 @@ class FtpExtractor
                 continue;
             }
 
-            if ($item['type'] === self::FTP_FILETYPE_FILE) {
-                $this->prepareToDownloadSingleFile($item['path'], $destinationPath);
-            }
+            $this->prepareToDownloadSingleFile($item['path'], $destinationPath);
         }
 
+        $this->logger->info(sprintf("Already filtered %d/%d items", count($items), count($items)));
         $this->logger->info(sprintf("Found %d file(s) to be downloaded", count($this->filesToDownload)));
     }
 
