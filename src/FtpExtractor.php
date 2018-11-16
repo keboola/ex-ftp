@@ -18,6 +18,7 @@ class FtpExtractor
     private const FILE_DESTINATION_KEY = 'destination-path';
     private const FILE_TIMESTAMP_KEY = 'timestamp';
     private const FILE_SOURCE_KEY = 'source-path';
+    private const LOGGER_INFO_LOOP = '10';
 
     /**
      * @var FtpFilesystem
@@ -66,8 +67,20 @@ class FtpExtractor
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
         $this->logger->info("Connected to host");
-
+        $this->logger->info(sprintf("Base path contains %s item(s)", count($items)));
+        $i = 0;
         foreach ($items as $item) {
+            if ($i % self::LOGGER_INFO_LOOP === 0) {
+                $this->logger->info(
+                    sprintf(
+                        "Already filtered %d/%d items",
+                        $i,
+                        count($items)
+                    )
+                );
+            }
+            $i++;
+
             if (!GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
                 continue;
             }
@@ -83,10 +96,13 @@ class FtpExtractor
     private function prepareToDownloadSingleFile(string $sourcePath, string $destinationPath): void
     {
         $destination = $destinationPath . '/' . strtr($sourcePath, ['/' => '-']);
-        try {
-            $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
-        } catch (FileNotFoundException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        $timestamp = 0;
+        if ($this->onlyNewFiles) {
+            try {
+                $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
+            } catch (FileNotFoundException $e) {
+                throw new UserException($e->getMessage(), $e->getCode(), $e);
+            }
         }
 
         $this->filesToDownload[] = [
