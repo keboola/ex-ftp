@@ -100,7 +100,6 @@ class FtpExtractor
         }
 
         $this->logger->info(sprintf("Already filtered %d/%d items", count($items), count($items)));
-        $this->logger->info(sprintf("Found %d file(s) to be downloaded", count($this->filesToDownload)));
     }
 
     private function prepareToDownloadSingleFile(string $sourcePath, string $destinationPath): void
