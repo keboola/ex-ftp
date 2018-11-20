@@ -14,7 +14,7 @@ The configuration requires following properties:
 - `host` - string (required): IP address or Hostname of FTP(s)/SFTP server
 - `port` - integer (required): Server port (default port is 21)
 - `username` - string (required): User with correct access rights
-- `password` - string (required): Password for given User
+- `password` - string (optional): Password for given User
 - `path` - string (required): Path to specific file or glob syntax path
     - FTP(s) uses absolute path
     - SFTP uses relative path according to user's HOME directory
