@@ -65,7 +65,7 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->end()
                 ->integerNode('timeout')
                     ->min(1)
-                    ->defaultValue(10)
+                    ->defaultValue(60)
                 ->end()
             ->end()
         ;
