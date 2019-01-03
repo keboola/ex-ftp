@@ -59,6 +59,7 @@ class AdapterFactory
     private static function setSftpRoot(SftpAdapter $adapter, string $sourcePath): void
     {
         if (substr($sourcePath, 0, 1) === '/') {
+            $adapter->setRoot('/');
             return;
         }
         try {
