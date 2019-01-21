@@ -127,6 +127,36 @@ docker-compose build dev
 - Code sniffer: `docker-compose run --rm dev composer phpcs`
 - Static analysis: `docker-compose run --rm dev composer phpstan`
 
+## New functional test
+
+Because FTP extractor works with file's timestamps, all `state.json`
+files must be crated at runtime. When you add new functional test with
+config option `onlyNewFiles` set to `false` add following to 
+`tests/functional/DatadirTest.php`:
+```php
+$state = [
+    "ex-ftp-state" => [
+        "newest-timestamp" => 0,
+        "last-timestamp-files" => [],
+    ],
+];
+JsonHelper::writeFile(__DIR__ . '/###NAME_OF_TEST###/expected/data/out/state.json', $state);
+
+``` 
+
+For tests with `onlyNewFiles` set to `true` you have to specify both state.json files:
+```php
+$state = [
+    "ex-ftp-state" => [
+        "newest-timestamp" => $timestamps["dir1/alone.txt"],
+        "last-timestamp-files" => ["dir1/alone.txt"],
+    ],
+];
+JsonHelper::writeFile(__DIR__ . '/###NAME_OF_TEST###/expected/data/out/state.json', $state);
+JsonHelper::writeFile(__DIR__ . '/###NAME_OF_TEST###/source/data/in/state.json', $state);
+```
+Where `alone.txt` should be the single file in downloaded folder.
+
  
 # Integration
 
