@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor;
 
 use Keboola\Component\UserException;
+use Keboola\Utils\Sanitizer\ColumnNameSanitizer;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem as FtpFilesystem;
 use Psr\Log\LoggerInterface;
@@ -131,6 +132,7 @@ class FtpExtractor
         $fs = new Filesystem();
         $downloadedFiles = 0;
         foreach ($this->filesToDownload as $file) {
+            $file[self::FILE_DESTINATION_KEY] = ColumnNameSanitizer::toAscii($file[self::FILE_DESTINATION_KEY]);
             if ($this->onlyNewFiles
                 && !$registry->shouldBeFileUpdated(
                     $file[self::FILE_SOURCE_KEY],

@@ -32,6 +32,14 @@ class DatadirTest extends DatadirTestCase
 
         $state = [
             "ex-ftp-state" => [
+                "newest-timestamp" => 0,
+                "last-timestamp-files" => [],
+            ],
+        ];
+        JsonHelper::writeFile(__DIR__ . '/special-chars/expected/data/out/state.json', $state);
+
+        $state = [
+            "ex-ftp-state" => [
                 "newest-timestamp" => $timestamps["dir1/recursive.bin"],
                 "last-timestamp-files" => ["dir1/recursive.bin"],
             ],
