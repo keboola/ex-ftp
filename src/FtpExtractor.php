@@ -77,6 +77,8 @@ class FtpExtractor
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         } catch (\ErrorException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (FileNotFoundException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
         $this->logger->info("Connected to host");
         $this->logger->info(sprintf("Base path contains %s item(s)", count($items)));
