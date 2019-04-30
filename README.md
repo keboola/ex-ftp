@@ -15,12 +15,11 @@ The configuration requires following properties:
 - `port` - integer (required): Server port (default port is 21)
 - `username` - string (required): User with correct access rights
 - `password` - string (optional): Password for given User
-- `path` - string (required): Path to specific file or glob syntax path
+- `path` - string (required): Path to specific file or glob syntax path (FTP server must support recursive listing)
     - FTP(s) uses absolute path
     - SFTP uses relative path according to user's HOME directory
 - `connectionType` - string (required): Type of connection (possible value [FTP|FTPS|SFTP])
 - `privateKey` - string (optional): Possible to use only with SFTP connectionType.
-- `wildcard` - boolean (optional): TRUE if path is glob syntax (default FALSE)
 - `onlyNewFiles` - boolean (optional): Compares timestamp of files from last run and download only new files
 
 ## Example
