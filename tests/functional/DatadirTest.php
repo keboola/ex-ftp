@@ -22,6 +22,7 @@ class DatadirTest extends DatadirTestCase
             $timestamps[$file->getRelativePathname()] = $file->getMTime();
         }
 
+        // --- normal-donwload test ----
         $state = [
             "ex-ftp-state" => [
                 "newest-timestamp" => 0,
@@ -30,6 +31,7 @@ class DatadirTest extends DatadirTestCase
         ];
         JsonHelper::writeFile(__DIR__ . '/normal-download/expected/data/out/state.json', $state);
 
+        // --- special-chars test ---
         $state = [
             "ex-ftp-state" => [
                 "newest-timestamp" => 0,
@@ -38,6 +40,7 @@ class DatadirTest extends DatadirTestCase
         ];
         JsonHelper::writeFile(__DIR__ . '/special-chars/expected/data/out/state.json', $state);
 
+        // --- nothing-to-update tests ---
         $state = [
             "ex-ftp-state" => [
                 "newest-timestamp" => $timestamps["dir1/recursive.bin"],
@@ -46,5 +49,14 @@ class DatadirTest extends DatadirTestCase
         ];
         JsonHelper::writeFile(__DIR__ . '/nothing-to-update/expected/data/out/state.json', $state);
         JsonHelper::writeFile(__DIR__ . '/nothing-to-update/source/data/in/state.json', $state);
+
+        // --- specific-directory test ----
+        $state = [
+            "ex-ftp-state" => [
+                "newest-timestamp" => 0,
+                "last-timestamp-files" => [],
+            ],
+        ];
+        JsonHelper::writeFile(__DIR__ . '/specific-directory/expected/data/out/state.json', $state);
     }
 }
