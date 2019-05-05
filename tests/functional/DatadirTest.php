@@ -58,5 +58,14 @@ class DatadirTest extends DatadirTestCase
             ],
         ];
         JsonHelper::writeFile(__DIR__ . '/specific-directory/expected/data/out/state.json', $state);
+
+        // --- recurse-manually test ----
+        $state = [
+            "ex-ftp-state" => [
+                "newest-timestamp" => 0,
+                "last-timestamp-files" => [],
+            ],
+        ];
+        JsonHelper::writeFile(__DIR__ . '/specific-directory/expected/data/out/state.json', $state);
     }
 }

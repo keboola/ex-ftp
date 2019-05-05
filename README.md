@@ -15,12 +15,14 @@ The configuration requires following properties:
 - `port` - integer (required): Server port (default port is 21)
 - `username` - string (required): User with correct access rights
 - `password` - string (optional): Password for given User
-- `path` - string (required): Path to specific file or glob syntax path (FTP server must support recursive listing)
+- `path` - string (required): Path to specific file or glob syntax path
     - FTP(s) uses absolute path
     - SFTP uses relative path according to user's HOME directory
 - `connectionType` - string (required): Type of connection (possible value [FTP|FTPS|SFTP])
 - `privateKey` - string (optional): Possible to use only with SFTP connectionType.
 - `onlyNewFiles` - boolean (optional): Compares timestamp of files from last run and download only new files
+- `recurseManually` - boolean (optional, default: false): Open each directory instead of using recursive listing. Use
+when your FTP(s) server does not support recursive listing.
 
 ## Example
 Configuration to download specific file:
@@ -48,7 +50,23 @@ Configuration to download files by glob syntax:
             "#password": "userpass",
             "port": 21,
             "path": "/dir1/*.csv",
+            "connectionType": "FTP"
+        }
+    } 
+    
+```
+Configuration to download files by glob syntax with recursion manually (when server does not support recursive listing):
+
+```json
+    {
+        "parameters": {
+            "host":"ftp.example.com",
+            "username": "ftpuser",
+            "#password": "userpass",
+            "port": 21,
+            "path": "/dir1/*/*.csv",
             "connectionType": "FTP",
+            "recurseManually": true
         }
     } 
     

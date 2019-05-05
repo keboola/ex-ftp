@@ -67,6 +67,9 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->min(1)
                     ->defaultValue(60)
                 ->end()
+                ->booleanNode('recurseManually')
+                    ->defaultFalse()
+                ->end()
             ->end()
         ;
         // @formatter:on

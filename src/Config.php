@@ -16,6 +16,7 @@ class Config extends BaseConfig
             'password' => $this->getValue(['parameters', '#password']),
             'port' => $this->getValue(['parameters', 'port']),
             'timeout' => $this->getValue(['parameters', 'timeout']),
+            'recurseManually' => $this->getValue(['parameters', 'recurseManually']),
         ];
     }
 
@@ -33,7 +34,6 @@ class Config extends BaseConfig
     {
         return $this->getValue(['parameters', 'onlyNewFiles']);
     }
-
 
     public function getPrivateKey(): string
     {
