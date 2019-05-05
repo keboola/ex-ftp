@@ -66,6 +66,6 @@ class DatadirTest extends DatadirTestCase
                 "last-timestamp-files" => [],
             ],
         ];
-        JsonHelper::writeFile(__DIR__ . '/specific-directory/expected/data/out/state.json', $state);
+        JsonHelper::writeFile(__DIR__ . '/recurse-manually/expected/data/out/state.json', $state);
     }
 }
