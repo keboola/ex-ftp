@@ -16,7 +16,7 @@ class Config extends BaseConfig
             'password' => $this->getValue(['parameters', '#password']),
             'port' => $this->getValue(['parameters', 'port']),
             'timeout' => $this->getValue(['parameters', 'timeout']),
-            'recurseManually' => $this->getValue(['parameters', 'recurseManually']),
+            'recurseManually' => $this->getValue(['parameters', 'manualRecursion']),
         ];
     }
 

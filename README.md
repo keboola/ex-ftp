@@ -21,7 +21,7 @@ The configuration requires following properties:
 - `connectionType` - string (required): Type of connection (possible value [FTP|FTPS|SFTP])
 - `privateKey` - string (optional): Possible to use only with SFTP connectionType.
 - `onlyNewFiles` - boolean (optional): Compares timestamp of files from last run and download only new files
-- `recurseManually` - boolean (optional, default: false): Open each directory instead of using recursive listing. Use
+- `manualRecursion` - boolean (optional, default: false): Open each directory instead of using recursive listing. Use
 when your FTP(s) server does not support recursive listing.
 
 ## Example
@@ -66,7 +66,7 @@ Configuration to download files by glob syntax with recursion manually (when ser
             "port": 21,
             "path": "/dir1/*/*.csv",
             "connectionType": "FTP",
-            "recurseManually": true
+            "manualRecursion": true
         }
     } 
     

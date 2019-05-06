@@ -67,7 +67,7 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->min(1)
                     ->defaultValue(60)
                 ->end()
-                ->booleanNode('recurseManually')
+                ->booleanNode('manualRecursion')
                     ->defaultFalse()
                 ->end()
             ->end()
