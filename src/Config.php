@@ -16,6 +16,7 @@ class Config extends BaseConfig
             'password' => $this->getValue(['parameters', '#password']),
             'port' => $this->getValue(['parameters', 'port']),
             'timeout' => $this->getValue(['parameters', 'timeout']),
+            'recurseManually' => $this->shouldUseManualRecursion(),
         ];
     }
 
@@ -34,9 +35,13 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', 'onlyNewFiles']);
     }
 
-
     public function getPrivateKey(): string
     {
         return $this->getValue(['parameters', '#privateKey']);
+    }
+
+    private function shouldUseManualRecursion(): bool
+    {
+        return $this->getValue(['parameters', 'listing']) === ConfigDefinition::LISTING_MANUAL;
     }
 }

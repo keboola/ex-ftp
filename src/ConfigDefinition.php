@@ -13,6 +13,9 @@ class ConfigDefinition extends BaseConfigDefinition
     public const CONNECTION_TYPE_SSL_EXPLICIT = 'FTPS';
     public const CONNECTION_TYPE_SFTP = 'SFTP';
 
+    public const LISTING_RECURSION = 'recursion';
+    public const LISTING_MANUAL = 'manual';
+
     protected function getParametersDefinition(): ArrayNodeDefinition
     {
         $parametersNode = parent::getParametersDefinition();
@@ -66,6 +69,10 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->integerNode('timeout')
                     ->min(1)
                     ->defaultValue(60)
+                ->end()
+                ->enumNode('listing')
+                    ->values([self::LISTING_MANUAL, self::LISTING_RECURSION])
+                    ->defaultValue(self::LISTING_RECURSION)
                 ->end()
             ->end()
         ;
