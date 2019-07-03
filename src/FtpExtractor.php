@@ -51,10 +51,20 @@ class FtpExtractor
 
     public function copyFiles(string $sourcePath, string $destinationPath, FileStateRegistry $registry): int
     {
-        /** @var AbstractFtpAdapter $adapter */
-        $adapter = $this->ftpFilesystem->getAdapter();
-        $adapter->getConnection();
-        $this->logger->info("Connected to host");
+        try {
+            /** @var AbstractFtpAdapter $adapter */
+            $adapter = $this->ftpFilesystem->getAdapter();
+            $adapter->getConnection();
+            $this->logger->info("Connected to host");
+        } catch (\RuntimeException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (\LogicException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (\ErrorException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (FileNotFoundException $e) {
+            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        }
 
         $this->prepareToDownloadFolder($sourcePath, $destinationPath);
         return $this->download($registry);
@@ -78,15 +88,19 @@ class FtpExtractor
                 $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
             }
             $countBeforeFilter = count($items);
-            $this->logger->info(sprintf(
-                "Base path listing contains %s item(s) including directories",
-                $countBeforeFilter
-            ));
+            $this->logger->info(
+                sprintf(
+                    "Base path listing contains %s item(s) including directories",
+                    $countBeforeFilter
+                )
+            );
             $items = ItemFilter::getOnlyFiles($items);
-            $this->logger->info(sprintf(
-                "%s item(s) filtered out",
-                $countBeforeFilter - count($items)
-            ));
+            $this->logger->info(
+                sprintf(
+                    "%s item(s) filtered out",
+                    $countBeforeFilter - count($items)
+                )
+            );
         } catch (\RuntimeException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         } catch (\LogicException $e) {
