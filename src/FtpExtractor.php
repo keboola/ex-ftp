@@ -77,7 +77,16 @@ class FtpExtractor
                 $basePath = Glob::getBasePath($absSourcePath);
                 $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
             }
+            $countBeforeFilter = count($items);
+            $this->logger->info(sprintf(
+                "Base path listing contains %s item(s) including directories",
+                $countBeforeFilter
+            ));
             $items = ItemFilter::getOnlyFiles($items);
+            $this->logger->info(sprintf(
+                "%s item(s) filtered out",
+                $countBeforeFilter - count($items)
+            ));
         } catch (\RuntimeException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         } catch (\LogicException $e) {
@@ -88,7 +97,7 @@ class FtpExtractor
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $this->logger->info(sprintf("Base path contains %s item(s)", count($items)));
+        $this->logger->info(sprintf("Base path contains %s files(s)", count($items)));
         $i = 0;
         foreach ($items as $item) {
             if ($i % self::LOGGER_INFO_LOOP === 0) {
