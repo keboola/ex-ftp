@@ -6,6 +6,7 @@ namespace Keboola\FtpExtractor;
 
 use Keboola\Component\UserException;
 use Keboola\Utils\Sanitizer\ColumnNameSanitizer;
+use League\Flysystem\Adapter\AbstractFtpAdapter;
 use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem as FtpFilesystem;
 use Psr\Log\LoggerInterface;
@@ -50,6 +51,11 @@ class FtpExtractor
 
     public function copyFiles(string $sourcePath, string $destinationPath, FileStateRegistry $registry): int
     {
+        /** @var AbstractFtpAdapter $adapter */
+        $adapter = $this->ftpFilesystem->getAdapter();
+        $adapter->getConnection();
+        $this->logger->info("Connected to host");
+
         $this->prepareToDownloadFolder($sourcePath, $destinationPath);
         return $this->download($registry);
     }
@@ -67,6 +73,7 @@ class FtpExtractor
                     'type' => ($file->isFile())? ItemFilter::FTP_FILETYPE_FILE:'',
                 ];
             } else { //means is glob based path
+                $this->logger->info("Fetching list of files in base path");
                 $basePath = Glob::getBasePath($absSourcePath);
                 $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
             }
@@ -80,14 +87,14 @@ class FtpExtractor
         } catch (FileNotFoundException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         }
-        $this->logger->info("Connected to host");
+
         $this->logger->info(sprintf("Base path contains %s item(s)", count($items)));
         $i = 0;
         foreach ($items as $item) {
             if ($i % self::LOGGER_INFO_LOOP === 0) {
                 $this->logger->info(
                     sprintf(
-                        "Already filtered %d/%d items",
+                        "Prepared %d/%d items for download",
                         $i,
                         count($items)
                     )
@@ -102,7 +109,7 @@ class FtpExtractor
             $this->prepareToDownloadSingleFile($item['path'], $destinationPath);
         }
 
-        $this->logger->info(sprintf("Already filtered %d/%d items", count($items), count($items)));
+        $this->logger->info(sprintf("Prepared %d/%d items for download", count($items), count($items)));
     }
 
     private function prepareToDownloadSingleFile(string $sourcePath, string $destinationPath): void
