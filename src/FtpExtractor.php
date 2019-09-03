@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
-use Keboola\Component\UserException;
 use Keboola\Utils\Sanitizer\ColumnNameSanitizer;
 use League\Flysystem\Adapter\AbstractFtpAdapter;
 use League\Flysystem\FileNotFoundException;
@@ -74,14 +73,8 @@ class FtpExtractor
             });
 
             $this->logger->info('Connection successful');
-        } catch (\RuntimeException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\LogicException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\ErrorException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (FileNotFoundException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (\RuntimeException | \LogicException | \ErrorException | FileNotFoundException $e) {
+            ExceptionConverter::resolve($e);
         }
 
         $this->prepareToDownloadFolder($sourcePath, $destinationPath);
@@ -119,14 +112,8 @@ class FtpExtractor
                     $countBeforeFilter - count($items)
                 )
             );
-        } catch (\RuntimeException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\LogicException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\ErrorException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (FileNotFoundException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (\RuntimeException | \LogicException | \ErrorException | FileNotFoundException $e) {
+            ExceptionConverter::resolve($e);
         }
 
         $this->logger->info(sprintf("Base path contains %s files(s)", count($items)));
@@ -160,10 +147,8 @@ class FtpExtractor
         if ($this->onlyNewFiles) {
             try {
                 $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
-            } catch (FileNotFoundException $e) {
-                throw new UserException($e->getMessage(), $e->getCode(), $e);
-            } catch (\ErrorException $e) {
-                throw new UserException($e->getMessage(), $e->getCode(), $e);
+            } catch (\ErrorException | FileNotFoundException $e) {
+                ExceptionConverter::resolve($e);
             }
         }
 
@@ -202,7 +187,7 @@ class FtpExtractor
                     $this->ftpFilesystem->read($file[self::FILE_SOURCE_KEY])
                 );
             } catch (FileNotFoundException $e) {
-                throw new UserException("Error while trying to download file: " . $e->getMessage());
+                ExceptionConverter::toUser($e, sprintf('Error while trying to download file: %s', $e->getMessage()));
             }
             $downloadedFiles++;
         }
