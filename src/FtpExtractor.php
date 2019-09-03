@@ -85,8 +85,8 @@ class FtpExtractor
     {
         $absSourcePath = GlobValidator::convertToAbsolute($sourcePath); //because Glob work with absolute paths
 
+        $items = [];
         try {
-            $items = [];
             if (Glob::getStaticPrefix($absSourcePath) === $absSourcePath) { //means is file
                 $file = $this->ftpFilesystem->get($absSourcePath);
                 $items[] = [
