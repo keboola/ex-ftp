@@ -12,6 +12,9 @@ use League\Flysystem\Filesystem as FtpFilesystem;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Glob\Glob;
+use Retry\RetryProxy;
+use Retry\Policy\SimpleRetryPolicy;
+use Retry\BackOff\ExponentialBackOffPolicy;
 
 class FtpExtractor
 {
@@ -20,6 +23,8 @@ class FtpExtractor
     private const FILE_TIMESTAMP_KEY = 'timestamp';
     private const FILE_SOURCE_KEY = 'source-path';
     private const LOGGER_INFO_LOOP = '10';
+    private const RETRY_CONNECTION = 3;
+    private const RETRY_BACKOFF = 300;
 
     /**
      * @var FtpFilesystem
@@ -54,8 +59,20 @@ class FtpExtractor
         try {
             /** @var AbstractFtpAdapter $adapter */
             $adapter = $this->ftpFilesystem->getAdapter();
-            $adapter->getConnection();
-            $this->logger->info("Connected to host");
+            $logger = $this->logger;
+
+            (new RetryProxy(
+                new SimpleRetryPolicy(self::RETRY_CONNECTION, [
+                    \LogicException::class,
+                    \RuntimeException::class,
+                    \ErrorException::class,
+                ]),
+                new ExponentialBackOffPolicy(self::RETRY_BACKOFF)
+            ))->call(static function () use ($adapter, $logger): void {
+                $logger->info('Connecting to host ...');
+                $adapter->getConnection();
+                $logger->info('Connection successful');
+            });
         } catch (\RuntimeException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);
         } catch (\LogicException $e) {
@@ -80,7 +97,7 @@ class FtpExtractor
                 $file = $this->ftpFilesystem->get($absSourcePath);
                 $items[] = [
                     'path' => $file->getPath(),
-                    'type' => ($file->isFile())? ItemFilter::FTP_FILETYPE_FILE:'',
+                    'type' => ($file->isFile()) ? ItemFilter::FTP_FILETYPE_FILE : '',
                 ];
             } else { //means is glob based path
                 $this->logger->info("Fetching list of files in base path");
