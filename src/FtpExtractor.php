@@ -188,7 +188,10 @@ class FtpExtractor
                     $this->ftpFilesystem->read($file[self::FILE_SOURCE_KEY])
                 );
             } catch (FileNotFoundException $e) {
-                ExceptionConverter::toUserException($e, sprintf('Error while trying to download file: %s', $e->getMessage()));
+                ExceptionConverter::toUserException($e, sprintf(
+                    'Error while trying to download file: %s',
+                    $e->getMessage()
+                ));
             }
             $downloadedFiles++;
         }
