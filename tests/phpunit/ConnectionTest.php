@@ -11,8 +11,9 @@ use League\Flysystem\Adapter\Ftp;
 use League\Flysystem\AdapterInterface;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Sftp\SftpAdapter;
+use Monolog\Handler\TestHandler;
+use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\NullLogger;
 
 class ConnectionTest extends TestCase
 {
@@ -21,14 +22,36 @@ class ConnectionTest extends TestCase
      */
     public function testFalseConnection(AdapterInterface $adapter): void
     {
-        $fs = new Filesystem($adapter);
-
-        $extractor = new FtpExtractor(false, $fs, new NullLogger());
-        $this->expectException(UserException::class);
-        $this->expectExceptionMessageRegExp(
-            '/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)/'
+        $handler = new TestHandler();
+        $extractor = new FtpExtractor(
+            false,
+            new Filesystem($adapter),
+            (new Logger('ftpExtractorTest'))->pushHandler($handler)
         );
-        $extractor->copyFiles('source', 'destination', new FileStateRegistry([]));
+
+        try {
+            $extractor->copyFiles('source', 'destination', new FileStateRegistry([]));
+        } catch (\Throwable $e) {
+            $this->assertInstanceOf(UserException::class, $e);
+            $this->assertCount(3, $handler->getRecords());
+            $this->assertRegExp(
+                '/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)/',
+                $e->getMessage()
+            );
+
+            foreach ($handler->getRecords() as $count => $record) {
+                if ($count === 0) {
+                    $this->assertEquals('Connecting to host ...', $record['message']);
+                    continue;
+                }
+
+                $this->assertRegExp(
+                    '/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)/',
+                    $record['message']
+                );
+                $this->assertRegExp(sprintf('/Retrying\.\.\. \[%dx\]$/', $count), $record['message']);
+            }
+        }
     }
 
 
