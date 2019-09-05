@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
+use Keboola\FtpExtractor\Exception\ExceptionConverter;
 use Keboola\Utils\Sanitizer\ColumnNameSanitizer;
 use League\Flysystem\Adapter\AbstractFtpAdapter;
 use League\Flysystem\FileNotFoundException;

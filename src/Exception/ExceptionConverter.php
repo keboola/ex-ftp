@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Keboola\FtpExtractor;
+namespace Keboola\FtpExtractor\Exception;
 
 use Keboola\Component\UserException;
 use League\Flysystem\FileNotFoundException;
@@ -15,7 +15,7 @@ final class ExceptionConverter
             self::toUser($e);
         }
 
-        throw $e;
+        throw new ApplicationException($e->getMessage(), $e->getCode(), $e);
     }
 
     public static function toUser(\Throwable $e, ?string $customMessage = null): void
