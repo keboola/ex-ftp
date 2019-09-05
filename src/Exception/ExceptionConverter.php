@@ -15,10 +15,10 @@ final class ExceptionConverter
             || $e instanceof \LogicException
             || $e instanceof \ErrorException
             || $e instanceof FileNotFoundException) {
-            self::toUser($e);
+            self::toUserException($e);
         }
 
-        self::toApplication($e);
+        throw new ApplicationException($e->getMessage(), $e->getCode(), $e);
     }
 
     public static function handlePrepareToDownloaException(\Throwable $e): void
@@ -26,13 +26,8 @@ final class ExceptionConverter
         self::handleCopyFilesException($e);
     }
 
-    public static function toUser(\Throwable $e, ?string $customMessage = null): void
+    public static function toUserException(\Throwable $e, ?string $customMessage = null): void
     {
         throw new UserException($customMessage ?: $e->getMessage(), $e->getCode(), $e);
-    }
-
-    private static function toApplication(\Throwable $e): void
-    {
-        throw new ApplicationException($e->getMessage(), $e->getCode(), $e);
     }
 }

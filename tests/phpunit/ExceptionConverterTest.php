@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor\Tests;
 
 use Keboola\FtpExtractor\Exception\ApplicationException;
+use mysql_xdevapi\Exception;
 use PHPUnit\Framework\TestCase;
 use Keboola\FtpExtractor\Exception\ExceptionConverter;
 use League\Flysystem\FileNotFoundException;
@@ -65,14 +66,27 @@ class ExceptionConverterTest extends TestCase
     /**
      * @dataProvider userExceptionProvider
      */
-    public function tesToUserException(string $exception): void
+    public function testToUserException(string $exception): void
     {
         $this->expectException(UserException::class);
+        $this->expectExceptionMessage('foo');
 
         try {
             throw new $exception('foo');
         } catch (\Throwable $e) {
-            ExceptionConverter::toUser($e);
+            ExceptionConverter::toUserException($e);
+        }
+    }
+
+    public function testToUserExceptionWithCustomMessage(): void
+    {
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('bar');
+
+        try {
+            throw new Exception('foo');
+        } catch (\Throwable $e) {
+            ExceptionConverter::toUserException($e, 'bar');
         }
     }
 
