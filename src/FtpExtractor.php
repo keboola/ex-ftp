@@ -114,7 +114,7 @@ class FtpExtractor
                 )
             );
         } catch (\Throwable $e) {
-            ExceptionConverter::handlePrepareToDownloadFolderException($e);
+            ExceptionConverter::handlePrepareToDownloaException($e);
         }
 
         $this->logger->info(sprintf("Base path contains %s files(s)", count($items)));
@@ -149,7 +149,7 @@ class FtpExtractor
             try {
                 $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
             } catch (\Throwable $e) {
-                ExceptionConverter::handlePrepareToDownloadSingleFileException($e);
+                ExceptionConverter::handlePrepareToDownloaException($e);
             }
         }
 

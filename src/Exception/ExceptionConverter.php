@@ -21,18 +21,9 @@ final class ExceptionConverter
         self::toApplication($e);
     }
 
-    public static function handlePrepareToDownloadFolderException(\Throwable $e): void
+    public static function handlePrepareToDownloaException(\Throwable $e): void
     {
         self::handleCopyFilesException($e);
-    }
-
-    public static function handlePrepareToDownloadSingleFileException(\Throwable $e): void
-    {
-        if ($e instanceof \ErrorException || $e instanceof FileNotFoundException) {
-            self::toUser($e);
-        }
-
-        self::toApplication($e);
     }
 
     public static function toUser(\Throwable $e, ?string $customMessage = null): void
@@ -40,7 +31,7 @@ final class ExceptionConverter
         throw new UserException($customMessage ?: $e->getMessage(), $e->getCode(), $e);
     }
 
-    public static function toApplication(\Throwable $e): void
+    private static function toApplication(\Throwable $e): void
     {
         throw new ApplicationException($e->getMessage(), $e->getCode(), $e);
     }
