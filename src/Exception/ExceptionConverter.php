@@ -9,13 +9,30 @@ use League\Flysystem\FileNotFoundException;
 
 final class ExceptionConverter
 {
-    public static function resolve(\Throwable $e): void
+    public static function handleCopyFilesException(\Throwable $e): void
     {
-        if (self::isUserException($e)) {
+        if ($e instanceof \RuntimeException
+            || $e instanceof \LogicException
+            || $e instanceof \ErrorException
+            || $e instanceof FileNotFoundException) {
             self::toUser($e);
         }
 
-        throw new ApplicationException($e->getMessage(), $e->getCode(), $e);
+        self::toApplication($e);
+    }
+
+    public static function handlePrepareToDownloadFolderException(\Throwable $e): void
+    {
+        self::handleCopyFilesException($e);
+    }
+
+    public static function handlePrepareToDownloadSingleFileException(\Throwable $e): void
+    {
+        if ($e instanceof \ErrorException || $e instanceof FileNotFoundException) {
+            self::toUser($e);
+        }
+
+        self::toApplication($e);
     }
 
     public static function toUser(\Throwable $e, ?string $customMessage = null): void
@@ -23,11 +40,8 @@ final class ExceptionConverter
         throw new UserException($customMessage ?: $e->getMessage(), $e->getCode(), $e);
     }
 
-    private static function isUserException(\Throwable $e): bool
+    public static function toApplication(\Throwable $e): void
     {
-        return $e instanceof \RuntimeException
-            || $e instanceof \LogicException
-            || $e instanceof \ErrorException
-            || $e instanceof FileNotFoundException;
+        throw new ApplicationException($e->getMessage(), $e->getCode(), $e);
     }
 }

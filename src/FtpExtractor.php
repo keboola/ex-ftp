@@ -74,8 +74,8 @@ class FtpExtractor
             });
 
             $this->logger->info('Connection successful');
-        } catch (\RuntimeException | \LogicException | \ErrorException | FileNotFoundException $e) {
-            ExceptionConverter::resolve($e);
+        } catch (\Throwable $e) {
+            ExceptionConverter::handleCopyFilesException($e);
         }
 
         $this->prepareToDownloadFolder($sourcePath, $destinationPath);
@@ -113,8 +113,8 @@ class FtpExtractor
                     $countBeforeFilter - count($items)
                 )
             );
-        } catch (\RuntimeException | \LogicException | \ErrorException | FileNotFoundException $e) {
-            ExceptionConverter::resolve($e);
+        } catch (\Throwable $e) {
+            ExceptionConverter::handlePrepareToDownloadFolderException($e);
         }
 
         $this->logger->info(sprintf("Base path contains %s files(s)", count($items)));
@@ -148,8 +148,8 @@ class FtpExtractor
         if ($this->onlyNewFiles) {
             try {
                 $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
-            } catch (\ErrorException | FileNotFoundException $e) {
-                ExceptionConverter::resolve($e);
+            } catch (\Throwable $e) {
+                ExceptionConverter::handlePrepareToDownloadSingleFileException($e);
             }
         }
 
