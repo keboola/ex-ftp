@@ -13,7 +13,7 @@ use Keboola\Component\UserException;
 class ExceptionConverterTest extends TestCase
 {
     /**
-     * @dataProvider userExceptionProvider
+     * @dataProvider baseUserExceptionProvider
      */
     public function testHandleCopyFilesExpectedUserException(string $exception): void
     {
@@ -38,7 +38,7 @@ class ExceptionConverterTest extends TestCase
     }
 
     /**
-     * @dataProvider userExceptionProvider
+     * @dataProvider baseUserExceptionProvider
      */
     public function testHandlePrepareToDownloaExpectedUserException(string $exception): void
     {
@@ -62,40 +62,67 @@ class ExceptionConverterTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider userExceptionProvider
-     */
-    public function testToUserException(string $exception): void
+    public function testHandleDownloadForFileNotFound(): void
     {
+        $pathFile = '/foo/bar.jpg';
         $this->expectException(UserException::class);
-        $this->expectExceptionMessage('foo');
+        $this->expectExceptionMessage(
+            sprintf('Error while trying to download file: File not found at path: %s', $pathFile)
+        );
+
+        try {
+            throw new FileNotFoundException($pathFile);
+        } catch (\Throwable $e) {
+            ExceptionConverter::handleDownload($e);
+        }
+    }
+
+    public function testHandleDownloadForErrorOperationInProgress(): void
+    {
+        $message = 'ftp_fget(): php_connect_nonb() failed: Operation now in progress (115)';
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage(
+            sprintf('Connection was terminated. Check that the connection is not blocked by Firewall: %s', $message)
+        );
+
+        try {
+            throw new \ErrorException($message);
+        } catch (\Throwable $e) {
+            ExceptionConverter::handleDownload($e);
+        }
+    }
+
+    /**
+     * @dataProvider aplicationExceptionForDownloadProvider
+     */
+    public function testHandleDownloadExpectedApplicationException(string $exception): void
+    {
+        $this->expectException(ApplicationException::class);
 
         try {
             throw new $exception('foo');
         } catch (\Throwable $e) {
-            ExceptionConverter::toUserException($e);
+            ExceptionConverter::handleDownload($e);
         }
     }
 
-    public function testToUserExceptionWithCustomMessage(): void
-    {
-        $this->expectException(UserException::class);
-        $this->expectExceptionMessage('bar');
-
-        try {
-            throw new \Exception('foo');
-        } catch (\Throwable $e) {
-            ExceptionConverter::toUserException($e, 'bar');
-        }
-    }
-
-    public function userExceptionProvider(): array
+    public function baseUserExceptionProvider(): array
     {
         return [
             [\RuntimeException::class],
             [\LogicException::class],
             [\ErrorException::class],
             [FileNotFoundException::class],
+        ];
+    }
+
+    public function aplicationExceptionForDownloadProvider(): array
+    {
+        return [
+            [\RuntimeException::class],
+            [\LogicException::class],
+            [\ErrorException::class],
+            [\Throwable::class],
         ];
     }
 }
