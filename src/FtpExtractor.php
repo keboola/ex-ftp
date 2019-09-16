@@ -7,7 +7,6 @@ namespace Keboola\FtpExtractor;
 use Keboola\FtpExtractor\Exception\ExceptionConverter;
 use Keboola\Utils\Sanitizer\ColumnNameSanitizer;
 use League\Flysystem\Adapter\AbstractFtpAdapter;
-use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem as FtpFilesystem;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;

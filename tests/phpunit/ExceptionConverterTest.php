@@ -13,14 +13,14 @@ use Keboola\Component\UserException;
 class ExceptionConverterTest extends TestCase
 {
     /**
-     * @dataProvider baseUserExceptionProvider
+     * @dataProvider exceptionMessageProvider
      */
-    public function testHandleCopyFilesExpectedUserException(string $exception): void
+    public function testHandleCopyFilesExpectedUserException(string $message): void
     {
         $this->expectException(UserException::class);
 
         try {
-            throw new $exception('foo');
+            throw new \RuntimeException($message);
         } catch (\Throwable $e) {
             ExceptionConverter::handleCopyFilesException($e);
         }
@@ -31,32 +31,32 @@ class ExceptionConverterTest extends TestCase
         $this->expectException(ApplicationException::class);
 
         try {
-            throw new \Exception('foo');
+            throw new \RuntimeException('Foo bar');
         } catch (\Throwable $e) {
             ExceptionConverter::handleCopyFilesException($e);
         }
     }
 
     /**
-     * @dataProvider baseUserExceptionProvider
+     * @dataProvider exceptionMessageProvider
      */
-    public function testHandlePrepareToDownloaExpectedUserException(string $exception): void
+    public function testHandlePrepareToDownloadExpectedUserException(string $message): void
     {
         $this->expectException(UserException::class);
 
         try {
-            throw new $exception('foo');
+            throw new \RuntimeException($message);
         } catch (\Throwable $e) {
             ExceptionConverter::handlePrepareToDownloaException($e);
         }
     }
 
-    public function testHandlePrepareToDownloaExpectedApplicationException(): void
+    public function testHandlePrepareToDownloadExpectedApplicationException(): void
     {
         $this->expectException(ApplicationException::class);
 
         try {
-            throw new \Exception('foo');
+            throw new \Exception('Foo bar');
         } catch (\Throwable $e) {
             ExceptionConverter::handlePrepareToDownloaException($e);
         }
@@ -92,37 +92,26 @@ class ExceptionConverterTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider aplicationExceptionForDownloadProvider
-     */
-    public function testHandleDownloadExpectedApplicationException(string $exception): void
+    public function testHandleDownloadExpectedApplicationException(): void
     {
         $this->expectException(ApplicationException::class);
 
         try {
-            throw new $exception('foo');
+            throw new \RuntimeException('Foo bar');
         } catch (\Throwable $e) {
             ExceptionConverter::handleDownload($e);
         }
     }
 
-    public function baseUserExceptionProvider(): array
+    public function exceptionMessageProvider(): array
     {
         return [
-            [\RuntimeException::class],
-            [\LogicException::class],
-            [\ErrorException::class],
-            [FileNotFoundException::class],
-        ];
-    }
-
-    public function aplicationExceptionForDownloadProvider(): array
-    {
-        return [
-            [\RuntimeException::class],
-            [\LogicException::class],
-            [\ErrorException::class],
-            [\Throwable::class],
+            ['Could not login with username: foo bar'],
+            ['php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known'],
+            ['Could not connect to server to verify public key.'],
+            ['The authenticity of host foo can\'t be established.'],
+            ['Cannot connect to foo bar'],
+            ['Root is invalid or does not exist: /foo/bar'],
         ];
     }
 }

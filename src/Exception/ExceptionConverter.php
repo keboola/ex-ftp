@@ -11,10 +11,13 @@ final class ExceptionConverter
 {
     public static function handleCopyFilesException(\Throwable $e): void
     {
-        if ($e instanceof \RuntimeException
-            || $e instanceof \LogicException
-            || $e instanceof \ErrorException
-            || $e instanceof FileNotFoundException) {
+        // phpcs:disable
+        if (preg_match_all('/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)|(Root is invalid)|(The authenticity of)/', $e->getMessage())) {
+            self::toUserException($e);
+        }
+        // phpcs:enable
+
+        if ($e instanceof FileNotFoundException) {
             self::toUserException($e);
         }
 
