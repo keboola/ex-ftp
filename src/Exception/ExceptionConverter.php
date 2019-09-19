@@ -49,7 +49,7 @@ final class ExceptionConverter
         self::toApplicationException($e);
     }
 
-    private static function toUserException(\Throwable $e, ?string $customMessage = null): void
+    public static function toUserException(\Throwable $e, ?string $customMessage = null): void
     {
         throw new UserException($customMessage ?: $e->getMessage(), $e->getCode(), $e);
     }

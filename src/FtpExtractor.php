@@ -14,6 +14,7 @@ use Webmozart\Glob\Glob;
 use Retry\RetryProxy;
 use Retry\Policy\SimpleRetryPolicy;
 use Retry\BackOff\ExponentialBackOffPolicy;
+use League\Flysystem\Sftp\SftpAdapterException;
 
 class FtpExtractor
 {
@@ -61,11 +62,7 @@ class FtpExtractor
             $this->logger->info('Connecting to host ...');
 
             (new RetryProxy(
-                new SimpleRetryPolicy(self::CONNECTION_RETRIES, [
-                    \LogicException::class,
-                    \RuntimeException::class,
-                    \ErrorException::class,
-                ]),
+                new SimpleRetryPolicy(self::CONNECTION_RETRIES),
                 new ExponentialBackOffPolicy(self::RETRY_BACKOFF),
                 $this->logger
             ))->call(static function () use ($adapter): void {
@@ -73,6 +70,8 @@ class FtpExtractor
             });
 
             $this->logger->info('Connection successful');
+        } catch (SftpAdapterException $e) {
+            ExceptionConverter::toUserException($e);
         } catch (\Throwable $e) {
             ExceptionConverter::handleCopyFilesException($e);
         }

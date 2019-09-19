@@ -103,6 +103,18 @@ class ExceptionConverterTest extends TestCase
         }
     }
 
+    public function testConvertToUserException(): void
+    {
+        $this->expectException(UserException::class);
+        $this->expectExceptionMessage('Foo bar');
+
+        try {
+            throw new \RuntimeException('Foo bar');
+        } catch (\Throwable $e) {
+            ExceptionConverter::toUserException($e);
+        }
+    }
+
     public function exceptionMessageProvider(): array
     {
         return [
