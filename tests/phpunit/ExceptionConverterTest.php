@@ -18,6 +18,7 @@ class ExceptionConverterTest extends TestCase
     public function testHandleCopyFilesExpectedUserException(string $message): void
     {
         $this->expectException(UserException::class);
+        $this->expectExceptionMessage($message);
 
         try {
             throw new \RuntimeException($message);
@@ -43,6 +44,7 @@ class ExceptionConverterTest extends TestCase
     public function testHandlePrepareToDownloadExpectedUserException(string $message): void
     {
         $this->expectException(UserException::class);
+        $this->expectExceptionMessage($message);
 
         try {
             throw new \RuntimeException($message);
