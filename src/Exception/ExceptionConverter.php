@@ -24,7 +24,7 @@ final class ExceptionConverter
         self::toApplicationException($e);
     }
 
-    public static function handlePrepareToDownloaException(\Throwable $e): void
+    public static function handlePrepareToDownloadException(\Throwable $e): void
     {
         self::handleCopyFilesException($e);
     }

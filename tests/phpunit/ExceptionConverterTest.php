@@ -49,7 +49,7 @@ class ExceptionConverterTest extends TestCase
         try {
             throw new \RuntimeException($message);
         } catch (\Throwable $e) {
-            ExceptionConverter::handlePrepareToDownloaException($e);
+            ExceptionConverter::handlePrepareToDownloadException($e);
         }
     }
 
@@ -60,7 +60,7 @@ class ExceptionConverterTest extends TestCase
         try {
             throw new \Exception('Foo bar');
         } catch (\Throwable $e) {
-            ExceptionConverter::handlePrepareToDownloaException($e);
+            ExceptionConverter::handlePrepareToDownloadException($e);
         }
     }
 
