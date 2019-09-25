@@ -19,14 +19,14 @@ class ExceptionConverterTest extends TestCase
      */
     public function testHandleCopyFilesException(
         string $expectedException,
-        string $message,
-        string $throwException
+        string $expectedExceptionMessage,
+        \Throwable $throwException
     ): void {
         $this->expectException($expectedException);
-        $this->expectExceptionMessage($message);
+        $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
-            throw new $throwException($message);
+            throw $throwException;
         } catch (\Throwable $e) {
             ExceptionConverter::handleCopyFilesException($e);
         }
@@ -37,14 +37,14 @@ class ExceptionConverterTest extends TestCase
      */
     public function testHandlePrepareToDownloadException(
         string $expectedException,
-        string $message,
-        string $throwException
+        string $expectedExceptionMessage,
+        \Throwable $throwException
     ): void {
         $this->expectException($expectedException);
-        $this->expectExceptionMessage($message);
+        $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
-            throw new $throwException($message);
+            throw $throwException;
         } catch (\Throwable $e) {
             ExceptionConverter::handlePrepareToDownloadException($e);
         }
@@ -55,15 +55,14 @@ class ExceptionConverterTest extends TestCase
      */
     public function testHandleDownloadException(
         string $expectedException,
-        string $expectedMessage,
-        string $throwException,
-        string $throwMessage
+        string $expectedExceptionMessage,
+        \Throwable $throwException
     ): void {
         $this->expectException($expectedException);
-        $this->expectExceptionMessage($expectedMessage);
+        $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
-            throw new $throwException($throwMessage);
+            throw $throwException;
         } catch (\Throwable $e) {
             ExceptionConverter::handleDownloadException($e);
         }
@@ -75,57 +74,59 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 'Foo bar',
-                InvalidRootException::class,
+                new InvalidRootException('Foo bar'),
             ],
             [
                 UserException::class,
                 'Foo bar',
-                ConnectionErrorException::class,
+                new ConnectionErrorException('Foo bar'),
             ],
             [
                 UserException::class,
                 'Foo bar',
-                FileNotFoundException::class,
+                new FileNotFoundException('Foo bar'),
             ],
             [
                 UserException::class,
                 'Could not login with username: foo bar',
-                \RuntimeException::class,
+                new \RuntimeException('Could not login with username: foo bar'),
             ],
             [
                 UserException::class,
                 'php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known',
-                \RuntimeException::class,
+                new \RuntimeException(
+                    'php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known'
+                ),
             ],
             [
                 UserException::class,
                 'Could not connect to server to verify public key.',
-                \RuntimeException::class,
+                new \RuntimeException('Could not connect to server to verify public key.'),
             ],
             [
                 UserException::class,
                 'The authenticity of host foo can\'t be established.',
-                \RuntimeException::class,
+                new \RuntimeException('The authenticity of host foo can\'t be established.'),
             ],
             [
                 UserException::class,
                 'Cannot connect to foo bar',
-                \RuntimeException::class,
+                new \RuntimeException('Cannot connect to foo bar'),
             ],
             [
                 UserException::class,
                 'Root is invalid or does not exist: /foo/bar',
-                \RuntimeException::class,
+                new \RuntimeException('Root is invalid or does not exist: /foo/bar'),
             ],
             [
                 UserException::class,
                 'Foo bar',
-                ConnectionErrorException::class,
+                new ConnectionErrorException('Foo bar'),
             ],
             [
                 ApplicationException::class,
                 'Foo bar',
-                \RuntimeException::class,
+                new \RuntimeException('Foo bar'),
             ],
         ];
     }
@@ -139,8 +140,7 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 sprintf('Error while trying to download file: File not found at path: %s', $filePtah),
-                FileNotFoundException::class,
-                $filePtah,
+                new FileNotFoundException($filePtah),
             ],
             [
                 UserException::class,
@@ -148,20 +148,17 @@ class ExceptionConverterTest extends TestCase
                     'Connection was terminated. Check that the connection is not blocked by Firewall: %s',
                     $progressMessage
                 ),
-                \ErrorException::class,
-                $progressMessage,
+                new \ErrorException($progressMessage),
             ],
             [
                 ApplicationException::class,
                 'Foo Bar',
-                \ErrorException::class,
-                'Foo Bar',
+                new \ErrorException('Foo Bar'),
             ],
             [
                 ApplicationException::class,
                 'Foo Bar',
-                \RuntimeException::class,
-                'Foo Bar',
+                new \RuntimeException('Foo Bar'),
             ],
         ];
     }
