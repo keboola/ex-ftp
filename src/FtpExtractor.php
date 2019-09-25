@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
-use Keboola\Component\UserException;
+use Keboola\FtpExtractor\Exception\ExceptionConverter;
 use Keboola\Utils\Sanitizer\ColumnNameSanitizer;
 use League\Flysystem\Adapter\AbstractFtpAdapter;
-use League\Flysystem\FileNotFoundException;
 use League\Flysystem\Filesystem as FtpFilesystem;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -62,11 +61,7 @@ class FtpExtractor
             $this->logger->info('Connecting to host ...');
 
             (new RetryProxy(
-                new SimpleRetryPolicy(self::CONNECTION_RETRIES, [
-                    \LogicException::class,
-                    \RuntimeException::class,
-                    \ErrorException::class,
-                ]),
+                new SimpleRetryPolicy(self::CONNECTION_RETRIES),
                 new ExponentialBackOffPolicy(self::RETRY_BACKOFF),
                 $this->logger
             ))->call(static function () use ($adapter): void {
@@ -74,14 +69,8 @@ class FtpExtractor
             });
 
             $this->logger->info('Connection successful');
-        } catch (\RuntimeException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\LogicException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\ErrorException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (FileNotFoundException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (\Throwable $e) {
+            ExceptionConverter::handleCopyFilesException($e);
         }
 
         $this->prepareToDownloadFolder($sourcePath, $destinationPath);
@@ -92,8 +81,8 @@ class FtpExtractor
     {
         $absSourcePath = GlobValidator::convertToAbsolute($sourcePath); //because Glob work with absolute paths
 
+        $items = [];
         try {
-            $items = [];
             if (Glob::getStaticPrefix($absSourcePath) === $absSourcePath) { //means is file
                 $file = $this->ftpFilesystem->get($absSourcePath);
                 $items[] = [
@@ -119,14 +108,8 @@ class FtpExtractor
                     $countBeforeFilter - count($items)
                 )
             );
-        } catch (\RuntimeException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\LogicException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\ErrorException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (FileNotFoundException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
+        } catch (\Throwable $e) {
+            ExceptionConverter::handlePrepareToDownloadException($e);
         }
 
         $this->logger->info(sprintf("Base path contains %s files(s)", count($items)));
@@ -160,10 +143,8 @@ class FtpExtractor
         if ($this->onlyNewFiles) {
             try {
                 $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
-            } catch (FileNotFoundException $e) {
-                throw new UserException($e->getMessage(), $e->getCode(), $e);
-            } catch (\ErrorException $e) {
-                throw new UserException($e->getMessage(), $e->getCode(), $e);
+            } catch (\Throwable $e) {
+                ExceptionConverter::handlePrepareToDownloadException($e);
             }
         }
 
@@ -201,8 +182,8 @@ class FtpExtractor
                     $file[self::FILE_DESTINATION_KEY],
                     $this->ftpFilesystem->read($file[self::FILE_SOURCE_KEY])
                 );
-            } catch (FileNotFoundException $e) {
-                throw new UserException("Error while trying to download file: " . $e->getMessage());
+            } catch (\Throwable $e) {
+                ExceptionConverter::handleDownloadException($e);
             }
             $downloadedFiles++;
         }

@@ -5,7 +5,7 @@
         "keboola/retry": "^0.4.1",
         "keboola/sanitizer": "^0.1.0",
         "league/flysystem": "^1.0",
-        "league/flysystem-sftp": "^1.0",
+        "league/flysystem-sftp": "^1.0.21",
         "webmozart/glob": "^4.1"
     },
     "require-dev": {
