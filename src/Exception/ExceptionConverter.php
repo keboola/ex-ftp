@@ -6,20 +6,25 @@ namespace Keboola\FtpExtractor\Exception;
 
 use Keboola\Component\UserException;
 use League\Flysystem\FileNotFoundException;
+use League\Flysystem\Sftp\SftpAdapterException;
 
 final class ExceptionConverter
 {
     public static function handleCopyFilesException(\Throwable $e): void
     {
+        if ($e instanceof SftpAdapterException) {
+            self::toUserException($e);
+        }
+
+        if ($e instanceof FileNotFoundException) {
+            self::toUserException($e);
+        }
+
         // phpcs:disable
         if (preg_match_all('/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)|(Root is invalid)|(The authenticity of)/', $e->getMessage())) {
             self::toUserException($e);
         }
         // phpcs:enable
-
-        if ($e instanceof FileNotFoundException) {
-            self::toUserException($e);
-        }
 
         self::toApplicationException($e);
     }
@@ -29,7 +34,7 @@ final class ExceptionConverter
         self::handleCopyFilesException($e);
     }
 
-    public static function handleDownload(\Throwable $e): void
+    public static function handleDownloadException(\Throwable $e): void
     {
         if ($e instanceof FileNotFoundException) {
             self::toUserException($e, sprintf(
@@ -49,7 +54,7 @@ final class ExceptionConverter
         self::toApplicationException($e);
     }
 
-    public static function toUserException(\Throwable $e, ?string $customMessage = null): void
+    private static function toUserException(\Throwable $e, ?string $customMessage = null): void
     {
         throw new UserException($customMessage ?: $e->getMessage(), $e->getCode(), $e);
     }
