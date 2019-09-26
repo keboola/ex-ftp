@@ -6,6 +6,7 @@ namespace Keboola\FtpExtractor\Exception;
 
 use Keboola\Component\UserException;
 use League\Flysystem\FileNotFoundException;
+use League\Flysystem\FilesystemException;
 use League\Flysystem\Sftp\SftpAdapterException;
 
 final class ExceptionConverter
@@ -16,12 +17,13 @@ final class ExceptionConverter
             self::toUserException($e);
         }
 
-        if ($e instanceof FileNotFoundException) {
+        if ($e instanceof FilesystemException) {
             self::toUserException($e);
         }
 
+        // Catch user_error from phpseclib
         // phpcs:disable
-        if (preg_match_all('/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)|(Root is invalid)|(The authenticity of)|(Connection closed prematurely)/', $e->getMessage())) {
+        if (preg_match_all('/(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)|(Root is invalid)|(The authenticity of)|(Connection closed prematurely)/', $e->getMessage())) {
             self::toUserException($e);
         }
         // phpcs:enable
