@@ -41,19 +41,29 @@ class FtpExtractor
     private $filesToDownload;
 
     /**
+     * @var FileStateRegistry
+     */
+    private $registry;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
 
-    public function __construct(bool $onlyNewFiles, FtpFilesystem $ftpFs, LoggerInterface $logger)
-    {
+    public function __construct(
+        bool $onlyNewFiles,
+        FtpFilesystem $ftpFs,
+        FileStateRegistry $registry,
+        LoggerInterface $logger
+    ) {
         $this->ftpFilesystem = $ftpFs;
         $this->onlyNewFiles = $onlyNewFiles;
         $this->filesToDownload = [];
+        $this->registry = $registry;
         $this->logger = $logger;
     }
 
-    public function copyFiles(string $sourcePath, string $destinationPath, FileStateRegistry $registry): int
+    public function copyFiles(string $sourcePath, string $destinationPath): int
     {
         try {
             /** @var AbstractFtpAdapter $adapter */
@@ -74,7 +84,7 @@ class FtpExtractor
         }
 
         $this->prepareToDownloadFolder($sourcePath, $destinationPath);
-        return $this->download($registry);
+        return $this->download();
     }
 
     private function prepareToDownloadFolder(string $sourcePath, string $destinationPath): void
@@ -143,19 +153,26 @@ class FtpExtractor
         if ($this->onlyNewFiles) {
             try {
                 $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
+                if ($this->registry->shouldBeFileUpdated($sourcePath, $timestamp)) {
+                    $this->filesToDownload[] = [
+                        self::FILE_DESTINATION_KEY => $destination,
+                        self::FILE_SOURCE_KEY => $sourcePath,
+                        self::FILE_TIMESTAMP_KEY => $timestamp,
+                    ];
+                }
             } catch (\Throwable $e) {
                 ExceptionConverter::handlePrepareToDownloadException($e);
             }
+        } else {
+            $this->filesToDownload[] = [
+                self::FILE_DESTINATION_KEY => $destination,
+                self::FILE_SOURCE_KEY => $sourcePath,
+                self::FILE_TIMESTAMP_KEY => $timestamp,
+            ];
         }
-
-        $this->filesToDownload[] = [
-            self::FILE_DESTINATION_KEY => $destination,
-            self::FILE_SOURCE_KEY => $sourcePath,
-            self::FILE_TIMESTAMP_KEY => $timestamp,
-        ];
     }
 
-    private function download(FileStateRegistry $registry): int
+    private function download(): int
     {
         $cbTimestampSort = function (array $a, array $b) {
             return intval($a[self::FILE_TIMESTAMP_KEY]) <=> intval($b[self::FILE_TIMESTAMP_KEY]);
@@ -166,14 +183,6 @@ class FtpExtractor
         $downloadedFiles = 0;
         foreach ($this->filesToDownload as $file) {
             $file[self::FILE_DESTINATION_KEY] = ColumnNameSanitizer::toAscii($file[self::FILE_DESTINATION_KEY]);
-            if ($this->onlyNewFiles
-                && !$registry->shouldBeFileUpdated(
-                    $file[self::FILE_SOURCE_KEY],
-                    $file[self::FILE_TIMESTAMP_KEY]
-                )
-            ) {
-                continue;
-            }
 
             $this->logger->info(sprintf("Downloading file %s", $file[self::FILE_SOURCE_KEY]));
 
