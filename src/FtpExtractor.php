@@ -89,6 +89,45 @@ class FtpExtractor
 
     private function prepareToDownloadFolder(string $sourcePath, string $destinationPath): void
     {
+        $items = $this->getPotentialFiles($sourcePath);
+        $i = 0;
+        foreach ($items as $item) {
+            if ($i % self::LOGGER_INFO_LOOP === 0) {
+                $this->logger->info(
+                    sprintf(
+                        "Prepared %d of a possible %d files for download",
+                        count($this->filesToDownload),
+                        count($items)
+                    )
+                );
+            }
+            $i++;
+            $timestamp = 0;
+            if ($this->onlyNewFiles) {
+                try {
+                    $timestamp = (int) $this->ftpFilesystem->getTimestamp($item['path']);
+                    if (!$this->registry->shouldBeFileUpdated($item['path'], $timestamp)) {
+                        continue;
+                    }
+                } catch (\Throwable $e) {
+                    ExceptionConverter::handlePrepareToDownloadException($e);
+                }
+            }
+            if (!GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
+                continue;
+            }
+            $destination = $destinationPath . '/' . strtr($item['path'], ['/' => '-']);
+            $this->filesToDownload[] = [
+                self::FILE_DESTINATION_KEY => $destination,
+                self::FILE_SOURCE_KEY => $item['path'],
+                self::FILE_TIMESTAMP_KEY => $timestamp,
+            ];
+        }
+        $this->logger->info(sprintf("%d files are ready for download", count($this->filesToDownload)));
+    }
+
+    private function getPotentialFiles(string $sourcePath): array
+    {
         $absSourcePath = GlobValidator::convertToAbsolute($sourcePath); //because Glob work with absolute paths
 
         $items = [];
@@ -121,55 +160,8 @@ class FtpExtractor
         } catch (\Throwable $e) {
             ExceptionConverter::handlePrepareToDownloadException($e);
         }
-
         $this->logger->info(sprintf("Base path contains %s files(s)", count($items)));
-        $i = 0;
-        foreach ($items as $item) {
-            if ($i % self::LOGGER_INFO_LOOP === 0) {
-                $this->logger->info(
-                    sprintf(
-                        "Prepared %d/%d items for download",
-                        $i,
-                        count($items)
-                    )
-                );
-            }
-            $i++;
-
-            if (!GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
-                continue;
-            }
-
-            $this->prepareToDownloadSingleFile($item['path'], $destinationPath);
-        }
-
-        $this->logger->info(sprintf("Prepared %d/%d items for download", count($items), count($items)));
-    }
-
-    private function prepareToDownloadSingleFile(string $sourcePath, string $destinationPath): void
-    {
-        $destination = $destinationPath . '/' . strtr($sourcePath, ['/' => '-']);
-        $timestamp = 0;
-        if ($this->onlyNewFiles) {
-            try {
-                $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
-                if ($this->registry->shouldBeFileUpdated($sourcePath, $timestamp)) {
-                    $this->filesToDownload[] = [
-                        self::FILE_DESTINATION_KEY => $destination,
-                        self::FILE_SOURCE_KEY => $sourcePath,
-                        self::FILE_TIMESTAMP_KEY => $timestamp,
-                    ];
-                }
-            } catch (\Throwable $e) {
-                ExceptionConverter::handlePrepareToDownloadException($e);
-            }
-        } else {
-            $this->filesToDownload[] = [
-                self::FILE_DESTINATION_KEY => $destination,
-                self::FILE_SOURCE_KEY => $sourcePath,
-                self::FILE_TIMESTAMP_KEY => $timestamp,
-            ];
-        }
+        return $items;
     }
 
     private function download(): int
