@@ -186,6 +186,7 @@ class FtpExtractor
             } catch (\Throwable $e) {
                 ExceptionConverter::handleDownloadException($e);
             }
+            $this->registry->updateOutputState($file[self::FILE_SOURCE_KEY], $file[self::FILE_TIMESTAMP_KEY]);
             $downloadedFiles++;
         }
         return $downloadedFiles;
