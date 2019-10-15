@@ -110,7 +110,7 @@ class DatadirTest extends DatadirTestCase
 
         $sourceDatadir = $specification->getSourceDatadirDirectory();
 
-        if (in_array('new-files-from-old-state', explode('/', $sourceDatadir))) {
+        if ($this->testNameMatchesDatadir('new-files-from-old-state', $sourceDatadir)) {
             // -- new-files-from-old-state test --
             $newCsvFile = __DIR__ . '/../ftpInitContent/a_brand_new_file.csv';
             $expectingCsvFile = __DIR__ . '/new-files-from-old-state/expected/data/out/files/a_brand_new_file.csv';
@@ -132,5 +132,10 @@ class DatadirTest extends DatadirTestCase
         $process = $this->runScript($tempDatadir->getTmpFolder());
 
         $this->assertMatchesSpecification($specification, $process, $tempDatadir->getTmpFolder());
+    }
+
+    private function testNameMatchesDatadir(string $testName, string $datadir): bool
+    {
+        return in_array($testName, explode('/', $datadir));
     }
 }
