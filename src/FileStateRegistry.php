@@ -39,22 +39,21 @@ class FileStateRegistry
 
     public function shouldBeFileUpdated(string $remotePath, int $timestamp): bool
     {
+        if ($this->newestTimestamp <= $timestamp && !in_array($remotePath, $this->filesWithNewestTimestamp)) {
+            return true;
+        }
+        return false;
+    }
+
+    public function updateOutputState(string $remotePath, int $timestamp): void
+    {
+        // if the file has a greater timestamp than our newest, then reset our values.
         if ($this->newestTimestamp < $timestamp) {
             $this->newestTimestamp = $timestamp;
-            $this->filesWithNewestTimestamp = [];
+            $this->filesWithNewestTimestamp = [$remotePath];
+        } else if ($this->newestTimestamp = $timestamp) {
+            $this->filesWithNewestTimestamp[] = $remotePath;
         }
-
-        if ($timestamp < $this->newestTimestamp) {
-            return false;
-        }
-
-        if (in_array($remotePath, $this->filesWithNewestTimestamp)) {
-            return false;
-        }
-
-        $this->filesWithNewestTimestamp[] = $remotePath;
-
-        return true;
     }
 
     public function getFileStates(): array

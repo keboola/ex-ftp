@@ -18,12 +18,12 @@ class FtpExtractorComponent extends BaseComponent
         $ftpExtractor = new FtpExtractor(
             $config->isOnlyForNewFiles(),
             $ftpFs,
+            $registry,
             $this->getLogger()
         );
         $count = $ftpExtractor->copyFiles(
             $config->getPathToCopy(),
-            $this->getOutputDirectory(),
-            $registry
+            $this->getOutputDirectory()
         );
         $this->writeOutputStateToFile(
             array_merge(

@@ -41,19 +41,29 @@ class FtpExtractor
     private $filesToDownload;
 
     /**
+     * @var FileStateRegistry
+     */
+    private $registry;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
 
-    public function __construct(bool $onlyNewFiles, FtpFilesystem $ftpFs, LoggerInterface $logger)
-    {
+    public function __construct(
+        bool $onlyNewFiles,
+        FtpFilesystem $ftpFs,
+        FileStateRegistry $registry,
+        LoggerInterface $logger
+    ) {
         $this->ftpFilesystem = $ftpFs;
         $this->onlyNewFiles = $onlyNewFiles;
         $this->filesToDownload = [];
+        $this->registry = $registry;
         $this->logger = $logger;
     }
 
-    public function copyFiles(string $sourcePath, string $destinationPath, FileStateRegistry $registry): int
+    public function copyFiles(string $sourcePath, string $destinationPath): int
     {
         try {
             /** @var AbstractFtpAdapter $adapter */
@@ -74,10 +84,49 @@ class FtpExtractor
         }
 
         $this->prepareToDownloadFolder($sourcePath, $destinationPath);
-        return $this->download($registry);
+        return $this->download();
     }
 
     private function prepareToDownloadFolder(string $sourcePath, string $destinationPath): void
+    {
+        $items = $this->getPotentialFiles($sourcePath);
+        $i = 0;
+        foreach ($items as $item) {
+            if ($i % self::LOGGER_INFO_LOOP === 0) {
+                $this->logger->info(
+                    sprintf(
+                        "Prepared %d of a possible %d files for download",
+                        count($this->filesToDownload),
+                        count($items)
+                    )
+                );
+            }
+            $i++;
+            $timestamp = 0;
+            if ($this->onlyNewFiles) {
+                try {
+                    $timestamp = (int) $this->ftpFilesystem->getTimestamp($item['path']);
+                    if (!$this->registry->shouldBeFileUpdated($item['path'], $timestamp)) {
+                        continue;
+                    }
+                } catch (\Throwable $e) {
+                    ExceptionConverter::handlePrepareToDownloadException($e);
+                }
+            }
+            if (!GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
+                continue;
+            }
+            $destination = $destinationPath . '/' . strtr($item['path'], ['/' => '-']);
+            $this->filesToDownload[] = [
+                self::FILE_DESTINATION_KEY => $destination,
+                self::FILE_SOURCE_KEY => $item['path'],
+                self::FILE_TIMESTAMP_KEY => $timestamp,
+            ];
+        }
+        $this->logger->info(sprintf("%d files are ready for download", count($this->filesToDownload)));
+    }
+
+    private function getPotentialFiles(string $sourcePath): array
     {
         $absSourcePath = GlobValidator::convertToAbsolute($sourcePath); //because Glob work with absolute paths
 
@@ -111,51 +160,11 @@ class FtpExtractor
         } catch (\Throwable $e) {
             ExceptionConverter::handlePrepareToDownloadException($e);
         }
-
         $this->logger->info(sprintf("Base path contains %s files(s)", count($items)));
-        $i = 0;
-        foreach ($items as $item) {
-            if ($i % self::LOGGER_INFO_LOOP === 0) {
-                $this->logger->info(
-                    sprintf(
-                        "Prepared %d/%d items for download",
-                        $i,
-                        count($items)
-                    )
-                );
-            }
-            $i++;
-
-            if (!GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
-                continue;
-            }
-
-            $this->prepareToDownloadSingleFile($item['path'], $destinationPath);
-        }
-
-        $this->logger->info(sprintf("Prepared %d/%d items for download", count($items), count($items)));
+        return $items;
     }
 
-    private function prepareToDownloadSingleFile(string $sourcePath, string $destinationPath): void
-    {
-        $destination = $destinationPath . '/' . strtr($sourcePath, ['/' => '-']);
-        $timestamp = 0;
-        if ($this->onlyNewFiles) {
-            try {
-                $timestamp = (int) $this->ftpFilesystem->getTimestamp($sourcePath);
-            } catch (\Throwable $e) {
-                ExceptionConverter::handlePrepareToDownloadException($e);
-            }
-        }
-
-        $this->filesToDownload[] = [
-            self::FILE_DESTINATION_KEY => $destination,
-            self::FILE_SOURCE_KEY => $sourcePath,
-            self::FILE_TIMESTAMP_KEY => $timestamp,
-        ];
-    }
-
-    private function download(FileStateRegistry $registry): int
+    private function download(): int
     {
         $cbTimestampSort = function (array $a, array $b) {
             return intval($a[self::FILE_TIMESTAMP_KEY]) <=> intval($b[self::FILE_TIMESTAMP_KEY]);
@@ -166,14 +175,6 @@ class FtpExtractor
         $downloadedFiles = 0;
         foreach ($this->filesToDownload as $file) {
             $file[self::FILE_DESTINATION_KEY] = ColumnNameSanitizer::toAscii($file[self::FILE_DESTINATION_KEY]);
-            if ($this->onlyNewFiles
-                && !$registry->shouldBeFileUpdated(
-                    $file[self::FILE_SOURCE_KEY],
-                    $file[self::FILE_TIMESTAMP_KEY]
-                )
-            ) {
-                continue;
-            }
 
             $this->logger->info(sprintf("Downloading file %s", $file[self::FILE_SOURCE_KEY]));
 
@@ -185,6 +186,7 @@ class FtpExtractor
             } catch (\Throwable $e) {
                 ExceptionConverter::handleDownloadException($e);
             }
+            $this->registry->updateOutputState($file[self::FILE_SOURCE_KEY], $file[self::FILE_TIMESTAMP_KEY]);
             $downloadedFiles++;
         }
         return $downloadedFiles;

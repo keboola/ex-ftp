@@ -26,11 +26,12 @@ class ConnectionTest extends TestCase
         $extractor = new FtpExtractor(
             false,
             new Filesystem($adapter),
+            new FileStateRegistry([]),
             (new Logger('ftpExtractorTest'))->pushHandler($handler)
         );
 
         try {
-            $extractor->copyFiles('source', 'destination', new FileStateRegistry([]));
+            $extractor->copyFiles('source', 'destination');
         } catch (\Throwable $e) {
             $this->assertInstanceOf(UserException::class, $e);
             $this->assertCount(3, $handler->getRecords());
