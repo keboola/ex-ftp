@@ -6,13 +6,13 @@ namespace Keboola\FtpExtractor\FunctionalTests;
 
 use Keboola\Csv\CsvWriter;
 use Keboola\Component\JsonHelper;
-use Keboola\DatadirTests\DatadirTestCase;
+use Keboola\DatadirTests\AbstractDatadirTestCase;
 use Keboola\DatadirTests\DatadirTestSpecificationInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
-class DatadirTest extends DatadirTestCase
+class DatadirTest extends AbstractDatadirTestCase
 {
     protected function setUp(): void
     {
@@ -110,7 +110,7 @@ class DatadirTest extends DatadirTestCase
 
         $sourceDatadir = $specification->getSourceDatadirDirectory();
 
-        if ($this->testNameMatchesDatadir('new-files-from-old-state', $sourceDatadir)) {
+        if ($this->doesNameMatchDatadir('new-files-from-old-state', $sourceDatadir)) {
             // -- new-files-from-old-state test --
             $newCsvFile = __DIR__ . '/../ftpInitContent/a_brand_new_file.csv';
             $expectingCsvFile = __DIR__ . '/new-files-from-old-state/expected/data/out/files/a_brand_new_file.csv';
@@ -134,7 +134,7 @@ class DatadirTest extends DatadirTestCase
         $this->assertMatchesSpecification($specification, $process, $tempDatadir->getTmpFolder());
     }
 
-    private function testNameMatchesDatadir(string $testName, string $datadir): bool
+    private function doesNameMatchDatadir(string $testName, string $datadir): bool
     {
         return in_array($testName, explode('/', $datadir));
     }
