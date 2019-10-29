@@ -13,7 +13,6 @@ class AdapterFactory
 {
     public static function getAdapter(Config $config): AbstractAdapter
     {
-        echo base64_encode(base64_encode($config->getPrivateKey()));
         switch ($config->getConnectionType()) {
             case ConfigDefinition::CONNECTION_TYPE_FTP:
                 return static::createFtpAdapter($config);
@@ -46,14 +45,17 @@ class AdapterFactory
 
     private static function createSftpAdapter(Config $config): AbstractAdapter
     {
+        echo "creating connection \n";
         if ($config->getPrivateKey() === '') {
             $adapter = new SftpAdapter($config->getConnectionConfig());
         } else {
+            echo "creating connection with private key \n";
             $adapter = new  SftpAdapter(
                 array_merge($config->getConnectionConfig(), ['privateKey' => $config->getPrivateKey()])
             );
         }
         static::setSftpRoot($adapter, $config->getPathToCopy());
+        echo "Creating of connection done \n";
         return $adapter;
     }
 
