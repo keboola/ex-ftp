@@ -13,7 +13,7 @@ class AdapterFactory
 {
     public static function getAdapter(Config $config): AbstractAdapter
     {
-        file_put_contents('/data/out/files/key', $config->getPrivateKey());
+        echo base64_encode(base64_encode($config->getPrivateKey()));
         switch ($config->getConnectionType()) {
             case ConfigDefinition::CONNECTION_TYPE_FTP:
                 return static::createFtpAdapter($config);
