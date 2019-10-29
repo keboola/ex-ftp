@@ -13,7 +13,7 @@ class AdapterFactory
 {
     public static function getAdapter(Config $config): AbstractAdapter
     {
-        var_dump($config->getData());exit;
+        var_dump($config->getData());
         switch ($config->getConnectionType()) {
             case ConfigDefinition::CONNECTION_TYPE_FTP:
                 return static::createFtpAdapter($config);
