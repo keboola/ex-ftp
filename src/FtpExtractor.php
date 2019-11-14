@@ -102,6 +102,9 @@ class FtpExtractor
                 );
             }
             $i++;
+            if (!GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
+                continue;
+            }
             $timestamp = 0;
             if ($this->onlyNewFiles) {
                 try {
@@ -112,9 +115,6 @@ class FtpExtractor
                 } catch (\Throwable $e) {
                     ExceptionConverter::handlePrepareToDownloadException($e);
                 }
-            }
-            if (!GlobValidator::validatePathAgainstGlob($item['path'], $sourcePath)) {
-                continue;
             }
             $destination = $destinationPath . '/' . strtr($item['path'], ['/' => '-']);
             $this->filesToDownload[] = [
