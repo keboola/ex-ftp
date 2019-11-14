@@ -95,9 +95,10 @@ class FtpExtractor
             if ($i % self::LOGGER_INFO_LOOP === 0) {
                 $this->logger->info(
                     sprintf(
-                        "Prepared %d of a possible %d files for download",
-                        count($this->filesToDownload),
-                        count($items)
+                        "Checked %d of a possible %d files and found %d to download so far",
+                        $i,
+                        count($items),
+                        count($this->filesToDownload)
                     )
                 );
             }
