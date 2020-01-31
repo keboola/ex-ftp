@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9953f8ff38c57a0452581e5d123280a2",
+    "content-hash": "b74160d160dd76e4f3d1f29d5f5e0d2f",
     "packages": [
         {
             "name": "keboola/php-component",
@@ -63,16 +63,16 @@
         },
         {
             "name": "keboola/retry",
-            "version": "0.4.1",
+            "version": "0.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/keboola/retry.git",
-                "reference": "6a090d625f01b06ba91242832cdb575f7a5a28af"
+                "reference": "afdb190a9186b30a27c75df2aaf24a6de07efebb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/keboola/retry/zipball/6a090d625f01b06ba91242832cdb575f7a5a28af",
-                "reference": "6a090d625f01b06ba91242832cdb575f7a5a28af",
+                "url": "https://api.github.com/repos/keboola/retry/zipball/afdb190a9186b30a27c75df2aaf24a6de07efebb",
+                "reference": "afdb190a9186b30a27c75df2aaf24a6de07efebb",
                 "shasum": ""
             },
             "require": {
@@ -110,7 +110,7 @@
                 "repeat",
                 "retry"
             ],
-            "time": "2019-08-19T13:47:21+00:00"
+            "time": "2020-01-31T14:20:00+00:00"
         },
         {
             "name": "keboola/sanitizer",
