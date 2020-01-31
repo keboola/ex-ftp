@@ -21,7 +21,7 @@ final class ExceptionConverter
         }
 
         // phpcs:disable
-        if (preg_match_all('/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)|(Root is invalid)|(The authenticity of)/', $e->getMessage())) {
+        if (preg_match_all('/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)|(Root is invalid)|(The authenticity of)|(Connection closed prematurely)/', $e->getMessage())) {
             self::toUserException($e);
         }
         // phpcs:enable
