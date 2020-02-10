@@ -13,27 +13,12 @@ final class ExceptionConverter
 {
     public static function handleCopyFilesException(\Throwable $e): void
     {
-        if ($e instanceof SftpAdapterException) {
-            self::toUserException($e);
-        }
-
-        if ($e instanceof FilesystemException) {
-            self::toUserException($e);
-        }
-
-        // Catch user_error from phpseclib
-        // phpcs:disable
-        if (preg_match_all('/(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)|(Root is invalid)|(The authenticity of)|(Connection closed prematurely)/', $e->getMessage())) {
-            self::toUserException($e);
-        }
-        // phpcs:enable
-
-        self::toApplicationException($e);
+        self::handleCommonException($e);
     }
 
     public static function handlePrepareToDownloadException(\Throwable $e): void
     {
-        self::handleCopyFilesException($e);
+        self::handleCommonException($e);
     }
 
     public static function handleDownloadException(\Throwable $e): void
@@ -45,6 +30,20 @@ final class ExceptionConverter
             ));
         }
 
+        self::handleCommonException($e);
+    }
+
+    private static function handleCommonException(\Throwable $e): void
+    {
+        if ($e instanceof SftpAdapterException) {
+            self::toUserException($e);
+        }
+
+        if ($e instanceof FilesystemException) {
+            self::toUserException($e);
+        }
+
+        // Make the message clear for user (ftp_rawlist(): php_connect_nonb() failed: Operation now in progress)
         if ($e instanceof \ErrorException
             && preg_match_all('/Operation now in progress \(115\)/', $e->getMessage())) {
             self::toUserException($e, sprintf(
@@ -52,6 +51,13 @@ final class ExceptionConverter
                 $e->getMessage()
             ));
         }
+
+        // Catch user_error from phpseclib
+        // phpcs:disable
+        if (preg_match_all('/(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)|(Root is invalid)|(The authenticity of)|(Connection closed prematurely)/', $e->getMessage())) {
+            self::toUserException($e);
+        }
+        // phpcs:enable
 
         self::toApplicationException($e);
     }

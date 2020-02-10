@@ -128,6 +128,14 @@ class ExceptionConverterTest extends TestCase
                 'Foo bar',
                 new \RuntimeException('Foo bar'),
             ],
+            [
+                UserException::class,
+                sprintf(
+                    'Connection was terminated. Check that the connection is not blocked by Firewall: ' .
+                    'Operation now in progress (115)'
+                ),
+                new \ErrorException('Operation now in progress (115)'),
+            ],
         ];
     }
 
