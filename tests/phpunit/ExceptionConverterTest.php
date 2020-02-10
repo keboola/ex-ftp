@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor\Tests;
 
 use Keboola\FtpExtractor\Exception\ApplicationException;
+use League\Flysystem\ConnectionRuntimeException;
 use League\Flysystem\Sftp\ConnectionErrorException;
 use League\Flysystem\Sftp\InvalidRootException;
 use PHPUnit\Framework\TestCase;
@@ -101,7 +102,7 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 'Could not connect to server to verify public key.',
-                new \RuntimeException('Could not connect to server to verify public key.'),
+                new ConnectionRuntimeException('Could not connect to server to verify public key.'),
             ],
             [
                 UserException::class,
@@ -116,7 +117,7 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 'Root is invalid or does not exist: /foo/bar',
-                new \RuntimeException('Root is invalid or does not exist: /foo/bar'),
+                new InvalidRootException('Root is invalid or does not exist: /foo/bar'),
             ],
             [
                 UserException::class,
