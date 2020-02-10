@@ -89,7 +89,7 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 'Could not login with username: foo bar',
-                new \RuntimeException('Could not login with username: foo bar'),
+                new ConnectionErrorException('Could not login with username: foo bar'),
             ],
             [
                 UserException::class,
