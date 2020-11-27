@@ -22,6 +22,7 @@ The configuration requires following properties:
 - `privateKey` - string (optional): Possible to use only with SFTP connectionType.
 - `onlyNewFiles` - boolean (optional): Compares timestamp of files from last run and download only new files
 - `listing` - string (optional, enum [manual|recursion] default: recursion): Use `manual` in case your FTP server does not support listing recursion.
+- `ignorePassiveAddress` - boolean (optional): Sets ignore passive address
 
 ## Example
 Configuration to download specific file:
