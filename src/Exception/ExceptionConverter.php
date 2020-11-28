@@ -48,7 +48,7 @@ final class ExceptionConverter
             && preg_match_all('/Operation now in progress \(115\)/', $e->getMessage())) {
             self::toUserException($e, sprintf(
                 'Connection was terminated. Check that the connection is not blocked by Firewall ' .
-                'or set ignore passive address mod: %s',
+                'or set ignore passive address: %s',
                 $e->getMessage()
             ));
         }
