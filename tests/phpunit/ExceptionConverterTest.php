@@ -132,8 +132,8 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 sprintf(
-                    'Connection was terminated. Check that the connection is not blocked by Firewall or set ignore passive address mod: ' .
-                    'Operation now in progress (115)'
+                    'Connection was terminated. Check that the connection is not blocked by Firewall ' .
+                    'or set ignore passive address mod: Operation now in progress (115)'
                 ),
                 new \ErrorException('Operation now in progress (115)'),
             ],
@@ -154,7 +154,8 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 sprintf(
-                    'Connection was terminated. Check that the connection is not blocked by Firewall or set ignore passive address mod: %s',
+                    'Connection was terminated. Check that the connection is not blocked by Firewall ' .
+                    'or set ignore passive address mod: %s',
                     $progressMessage
                 ),
                 new \ErrorException($progressMessage),
