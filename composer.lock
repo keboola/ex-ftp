@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b74160d160dd76e4f3d1f29d5f5e0d2f",
+    "content-hash": "e3636636253c1a2b9ed2a06204af7173",
     "packages": [
         {
             "name": "keboola/php-component",
@@ -2696,7 +2696,8 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.1"
+        "php": "^7.2"
     },
-    "platform-dev": []
+    "platform-dev": [],
+    "plugin-api-version": "2.0.0"
 }

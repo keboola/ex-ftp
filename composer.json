@@ -1,6 +1,6 @@
 {
     "require": {
-        "php": "^7.1",
+        "php": "^7.2",
         "keboola/php-component": "^5.0",
         "keboola/retry": "^0.5.0",
         "keboola/sanitizer": "^0.1.0",

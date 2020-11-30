@@ -74,6 +74,9 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->values([self::LISTING_MANUAL, self::LISTING_RECURSION])
                     ->defaultValue(self::LISTING_RECURSION)
                 ->end()
+                ->booleanNode('ignorePassiveAddress')
+                    ->defaultFalse()
+                ->end()
             ->end()
         ;
         // @formatter:on

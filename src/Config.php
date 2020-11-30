@@ -17,6 +17,7 @@ class Config extends BaseConfig
             'port' => $this->getValue(['parameters', 'port']),
             'timeout' => $this->getValue(['parameters', 'timeout']),
             'recurseManually' => $this->shouldUseManualRecursion(),
+            'ignorePassiveAddress' => $this->ignorePassiveAddress(),
         ];
     }
 
@@ -43,5 +44,10 @@ class Config extends BaseConfig
     private function shouldUseManualRecursion(): bool
     {
         return $this->getValue(['parameters', 'listing']) === ConfigDefinition::LISTING_MANUAL;
+    }
+
+    public function ignorePassiveAddress(): bool
+    {
+        return $this->getValue(['parameters', 'ignorePassiveAddress']);
     }
 }
