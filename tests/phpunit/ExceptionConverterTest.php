@@ -17,6 +17,7 @@ class ExceptionConverterTest extends TestCase
 {
     /**
      * @dataProvider exceptionMessageProvider
+     * @psalm-param class-string<\Throwable> $expectedException
      */
     public function testHandleCopyFilesException(
         string $expectedException,
@@ -35,6 +36,7 @@ class ExceptionConverterTest extends TestCase
 
     /**
      * @dataProvider exceptionMessageProvider
+     * @psalm-param class-string<\Throwable> $expectedException
      */
     public function testHandlePrepareToDownloadException(
         string $expectedException,
@@ -53,6 +55,7 @@ class ExceptionConverterTest extends TestCase
 
     /**
      * @dataProvider downloadExceptionMessageProvider
+     * @psalm-param class-string<\Throwable> $expectedException
      */
     public function testHandleDownloadException(
         string $expectedException,

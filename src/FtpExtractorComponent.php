@@ -9,7 +9,7 @@ use League\Flysystem\Filesystem;
 
 class FtpExtractorComponent extends BaseComponent
 {
-    public function run(): void
+    protected function run(): void
     {
         /** @var Config $config */
         $config = $this->getConfig();
