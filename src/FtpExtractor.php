@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
+use http\Header\Parser;
+use Keboola\Component\UserException;
+use Keboola\FtpExtractor\Exception\ApplicationException;
 use Keboola\FtpExtractor\Exception\ExceptionConverter;
 use Keboola\Utils\Sanitizer\ColumnNameSanitizer;
 use League\Flysystem\Adapter\AbstractFtpAdapter;
@@ -50,6 +53,11 @@ class FtpExtractor
      */
     private $logger;
 
+    /**
+     * @var Filesystem
+     */
+    private $fs;
+
     public function __construct(
         bool $onlyNewFiles,
         FtpFilesystem $ftpFs,
@@ -61,6 +69,7 @@ class FtpExtractor
         $this->filesToDownload = [];
         $this->registry = $registry;
         $this->logger = $logger;
+        $this->fs = new Filesystem();
     }
 
     public function copyFiles(string $sourcePath, string $destinationPath): int
@@ -70,11 +79,7 @@ class FtpExtractor
             $adapter = $this->ftpFilesystem->getAdapter();
             $this->logger->info('Connecting to host ...');
 
-            (new RetryProxy(
-                new SimpleRetryPolicy(self::CONNECTION_RETRIES),
-                new ExponentialBackOffPolicy(self::RETRY_BACKOFF),
-                $this->logger
-            ))->call(static function () use ($adapter): void {
+            $this->createRetryProxy()->call(static function () use ($adapter): void {
                 $adapter->getConnection();
             });
 
@@ -172,24 +177,83 @@ class FtpExtractor
         };
         uasort($this->filesToDownload, $cbTimestampSort);
 
-        $fs = new Filesystem();
         $downloadedFiles = 0;
         foreach ($this->filesToDownload as $file) {
-            $file[self::FILE_DESTINATION_KEY] = ColumnNameSanitizer::toAscii($file[self::FILE_DESTINATION_KEY]);
-
-            $this->logger->info(sprintf("Downloading file %s", $file[self::FILE_SOURCE_KEY]));
-
-            try {
-                $fs->dumpFile(
-                    $file[self::FILE_DESTINATION_KEY],
-                    (string) $this->ftpFilesystem->read($file[self::FILE_SOURCE_KEY])
-                );
-            } catch (\Throwable $e) {
-                ExceptionConverter::handleDownloadException($e);
-            }
-            $this->registry->updateOutputState($file[self::FILE_SOURCE_KEY], $file[self::FILE_TIMESTAMP_KEY]);
+            $this->downloadFile($file);
             $downloadedFiles++;
         }
         return $downloadedFiles;
+    }
+
+    private function downloadFile(array $file): void
+    {
+        $file[self::FILE_DESTINATION_KEY] = ColumnNameSanitizer::toAscii($file[self::FILE_DESTINATION_KEY]);
+
+        $this->logger->info(sprintf("Downloading file %s", $file[self::FILE_SOURCE_KEY]));
+
+        $localPath = $file[self::FILE_DESTINATION_KEY];
+        $ftpPath = $file[self::FILE_SOURCE_KEY];
+
+        try {
+            $this->createRetryProxy()->call(function () use ($localPath, $ftpPath): void {
+                $ftpSize = $this->ftpFilesystem->getSize($ftpPath);
+                $this->fs->dumpFile($localPath, (string) $this->ftpFilesystem->read($ftpPath));
+                $localSize = filesize($localPath);
+                $this->checkFileSize($localPath, $ftpPath, $localSize, $ftpSize);
+            });
+        } catch (\Throwable $e) {
+            ExceptionConverter::handleDownloadException($e);
+        }
+        $this->registry->updateOutputState($file[self::FILE_SOURCE_KEY], $file[self::FILE_TIMESTAMP_KEY]);
+    }
+
+    private function createRetryProxy(): RetryProxy
+    {
+        return new RetryProxy(
+            new SimpleRetryPolicy(self::CONNECTION_RETRIES),
+            new ExponentialBackOffPolicy(self::RETRY_BACKOFF),
+            $this->logger
+        );
+    }
+
+    /**
+     * @param string $localPath
+     * @param string $ftpPath
+     * @param int|false $localSize
+     * @param int|false $ftpSize
+     * @throws ApplicationException
+     */
+    private function checkFileSize(string $localPath, string $ftpPath, $localSize, $ftpSize): void
+    {
+        if (!is_int($localSize)) {
+            throw new ApplicationException(
+                sprintf('Cannot get size of the local file "%s".', $localPath)
+            );
+        }
+
+        if (!is_int($ftpSize)) {
+            throw new ApplicationException(
+                sprintf('Cannot get size of the FTP file "%s".', $ftpPath)
+            );
+        }
+
+        if ($ftpSize !== $localSize) {
+            throw new UserException(sprintf(
+                'The size of the downloaded file "%s" does not match the size reported from the FTP server. ' .
+                'FTP size: %s, local size: %s.',
+                $ftpPath,
+                self::humanReadableFileSize($ftpSize),
+                self::humanReadableFileSize($localSize)
+            ));
+        }
+    }
+
+    private static function humanReadableFileSize(int $size, int $precision = 2): string
+    {
+        // https://gist.github.com/liunian/9338301
+        for ($i = 0; ($size / 1024) > 0.9; $i++) {
+            $size /= 1024;
+        }
+        return round($size, $precision).['B','kB','MB','GB','TB','PB','EB','ZB','YB'][$i];
     }
 }
