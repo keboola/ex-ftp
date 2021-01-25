@@ -35,7 +35,7 @@ class ConnectionTest extends TestCase
         } catch (\Throwable $e) {
             $this->assertInstanceOf(UserException::class, $e);
             $this->assertCount(3, $handler->getRecords());
-            $this->assertRegExp(
+            $this->assertMatchesRegularExpression(
                 '/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)/',
                 $e->getMessage()
             );
@@ -46,11 +46,11 @@ class ConnectionTest extends TestCase
                     continue;
                 }
 
-                $this->assertRegExp(
+                $this->assertMatchesRegularExpression(
                     '/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)/',
                     $record['message']
                 );
-                $this->assertRegExp(sprintf('/Retrying\.\.\. \[%dx\]$/', $count), $record['message']);
+                $this->assertMatchesRegularExpression(sprintf('/Retrying\.\.\. \[%dx\]$/', $count), $record['message']);
             }
         }
     }

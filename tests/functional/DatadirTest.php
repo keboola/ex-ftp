@@ -110,7 +110,7 @@ class DatadirTest extends AbstractDatadirTestCase
 
         $sourceDatadir = $specification->getSourceDatadirDirectory();
 
-        if ($this->doesNameMatchDatadir('new-files-from-old-state', $sourceDatadir)) {
+        if ($this->doesNameMatchDatadir('new-files-from-old-state', (string) $sourceDatadir)) {
             // -- new-files-from-old-state test --
             $newCsvFile = __DIR__ . '/../ftpInitContent/a_brand_new_file.csv';
             $expectingCsvFile = __DIR__ . '/new-files-from-old-state/expected/data/out/files/a_brand_new_file.csv';

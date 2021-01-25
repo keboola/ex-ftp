@@ -16,16 +16,12 @@ class AdapterFactory
         switch ($config->getConnectionType()) {
             case ConfigDefinition::CONNECTION_TYPE_FTP:
                 return static::createFtpAdapter($config);
-                break;
             case ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT:
                 return static::createSslFtpImplicitAdapter($config);
-                break;
             case ConfigDefinition::CONNECTION_TYPE_SFTP:
                 return static::createSftpAdapter($config);
-                break;
             default:
                 throw new \InvalidArgumentException("Specified adapter not found");
-                break;
         }
     }
 

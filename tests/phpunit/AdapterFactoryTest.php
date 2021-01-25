@@ -17,6 +17,7 @@ class AdapterFactoryTest extends TestCase
 {
     /**
      * @dataProvider adapterConfigProvider
+     * @psalm-param class-string<object> $expectedClass
      */
     public function testGetFtpsImplicitAdapter(Config $config, string $expectedClass): void
     {
@@ -58,7 +59,7 @@ class AdapterFactoryTest extends TestCase
             new ConfigDefinition()
         );
         $this->expectException(UserException::class);
-        $this->expectExceptionMessageRegExp('/Could not login/');
+        $this->expectExceptionMessageMatches('/Could not login/');
         AdapterFactory::getAdapter($config);
     }
 

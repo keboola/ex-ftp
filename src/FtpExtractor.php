@@ -182,7 +182,7 @@ class FtpExtractor
             try {
                 $fs->dumpFile(
                     $file[self::FILE_DESTINATION_KEY],
-                    $this->ftpFilesystem->read($file[self::FILE_SOURCE_KEY])
+                    (string) $this->ftpFilesystem->read($file[self::FILE_SOURCE_KEY])
                 );
             } catch (\Throwable $e) {
                 ExceptionConverter::handleDownloadException($e);
