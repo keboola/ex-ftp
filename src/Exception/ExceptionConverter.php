@@ -35,6 +35,10 @@ final class ExceptionConverter
 
     private static function handleCommonException(\Throwable $e): void
     {
+        if ($e instanceof UserException) {
+            throw $e;
+        }
+
         if ($e instanceof SftpAdapterException) {
             self::toUserException($e);
         }

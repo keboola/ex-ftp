@@ -1,0 +1,10 @@
+{
+    "parameters": {
+        "host": "ftp-bad",
+        "username": "ftpuser",
+        "#password": "userpass",
+        "port": 21,
+        "path": "/*/*",
+        "connectionType": "FTP"
+    }
+}
