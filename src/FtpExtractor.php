@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
-use http\Header\Parser;
 use Keboola\Component\UserException;
 use Keboola\FtpExtractor\Exception\ApplicationException;
 use Keboola\FtpExtractor\Exception\ExceptionConverter;
@@ -194,8 +193,17 @@ class FtpExtractor
         $localPath = $file[self::FILE_DESTINATION_KEY];
         $ftpPath = $file[self::FILE_SOURCE_KEY];
 
+        /** @var AbstractFtpAdapter $adapter */
+        $adapter = $this->ftpFilesystem->getAdapter();
+
         try {
-            $this->createRetryProxy()->call(function () use ($localPath, $ftpPath): void {
+            $proxy = $this->createRetryProxy();
+            $proxy->call(function () use ($localPath, $ftpPath, $adapter, $proxy): void {
+                // Reconnect on error, connection is created automatically
+                if ($proxy->getTryCount() > 0) {
+                    $adapter->disconnect();
+                }
+
                 $ftpSize = $this->ftpFilesystem->getSize($ftpPath);
                 $this->fs->dumpFile($localPath, (string) $this->ftpFilesystem->read($ftpPath));
                 $localSize = filesize($localPath);
