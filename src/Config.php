@@ -17,6 +17,7 @@ class Config extends BaseConfig
             'port' => $this->getValue(['parameters', 'port']),
             'timeout' => $this->getValue(['parameters', 'timeout']),
             'recurseManually' => $this->shouldUseManualRecursion(),
+            'passive' => true,
             'ignorePassiveAddress' => $this->ignorePassiveAddress(),
         ];
     }
