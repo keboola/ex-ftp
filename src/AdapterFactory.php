@@ -4,69 +4,86 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
-use Keboola\Component\UserException;
-use League\Flysystem\Adapter\AbstractAdapter;
-use League\Flysystem\Adapter\Ftp;
-use League\Flysystem\Sftp\SftpAdapter;
+use InvalidArgumentException;
+use Keboola\FtpExtractor\Exception\ExceptionConverter;
+use League\Flysystem\Ftp\FtpConnectionProvider;
+use League\Flysystem\Ftp\RawListFtpConnectivityChecker;
+use Throwable;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\Ftp\FtpAdapter;
+use League\Flysystem\Ftp\FtpConnectionOptions;
+use League\Flysystem\PhpseclibV2\SftpAdapter;
+use League\Flysystem\PhpseclibV2\SftpConnectionProvider;
 
 class AdapterFactory
 {
-    public static function getAdapter(Config $config): AbstractAdapter
+    public static function getAdapter(Config $config): FilesystemAdapter
     {
+        $options = $config->getConnectionConfig();
         switch ($config->getConnectionType()) {
             case ConfigDefinition::CONNECTION_TYPE_FTP:
-                return static::createFtpAdapter($config);
+                return static::createFtpAdapter($options);
             case ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT:
-                return static::createSslFtpImplicitAdapter($config);
+                $options['ssl'] = true;
+                return static::createFtpAdapter($options);
             case ConfigDefinition::CONNECTION_TYPE_SFTP:
-                return static::createSftpAdapter($config);
+                if ($config->getPrivateKey() !== '') {
+                    $options['privateKey'] = $config->getPrivateKey();
+                }
+                return static::createSftpAdapter($options, $config->getPathToCopy());
             default:
-                throw new \InvalidArgumentException("Specified adapter not found");
+                throw new InvalidArgumentException("Specified adapter not found");
         }
     }
 
-    private static function createFtpAdapter(Config $config): AbstractAdapter
+    public static function createFtpAdapter(array $options): FilesystemAdapter
     {
-        return new Ftp(
-            $config->getConnectionConfig()
+        $connectionProvider = new FtpConnectionProvider();
+        $options['root'] = self::getFtpRoot(
+            $connectionProvider,
+            FtpConnectionOptions::fromArray($options)
+        );
+        return new FtpAdapter(
+            FtpConnectionOptions::fromArray($options),
+            $connectionProvider,
+            new RawListFtpConnectivityChecker(),
         );
     }
 
-    private static function createSslFtpImplicitAdapter(Config $config): AbstractAdapter
+    public static function createSftpAdapter(array $options, string $pathToCopy): FilesystemAdapter
     {
-        return new Ftp(
-            array_merge($config->getConnectionConfig(), ['ssl' => true])
+        $connectionProvider = SftpConnectionProvider::fromArray($options);
+        $root = self::getSftpRoot($connectionProvider, $pathToCopy);
+        return new SftpAdapter(
+            $connectionProvider,
+            $root,
         );
     }
 
-    private static function createSftpAdapter(Config $config): AbstractAdapter
-    {
-        if ($config->getPrivateKey() === '') {
-            $adapter = new SftpAdapter($config->getConnectionConfig());
-        } else {
-            $adapter = new  SftpAdapter(
-                array_merge($config->getConnectionConfig(), ['privateKey' => $config->getPrivateKey()])
-            );
+    private static function getFtpRoot(
+        FtpConnectionProvider $connectionProvider,
+        FtpConnectionOptions $options
+    ): string {
+        try {
+            $connection = $connectionProvider->createConnection($options);
+            $pwd = (string) ftp_pwd($connection);
+            return $pwd ?: '/';
+        } catch (Throwable $e) {
+            throw ExceptionConverter::handleCommonException($e);
         }
-        static::setSftpRoot($adapter, $config->getPathToCopy());
-        return $adapter;
     }
 
-    private static function setSftpRoot(SftpAdapter $adapter, string $sourcePath): void
+    private static function getSftpRoot(SftpConnectionProvider $connectionProvider, string $sourcePath): string
     {
         if (substr($sourcePath, 0, 1) === '/') {
-            $adapter->setRoot('/');
-            return;
+            return '/';
         }
+
         try {
-            $pwd = $adapter->getConnection()->pwd();
-            $adapter->setRoot($pwd);
-        } catch (\RuntimeException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\LogicException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\ErrorException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
+            $connection = $connectionProvider->provideConnection();
+            return $connection->pwd();
+        } catch (Throwable $e) {
+            throw ExceptionConverter::handleCommonException($e);
         }
     }
 }
