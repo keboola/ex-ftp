@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
+use League\Flysystem\PathNormalizer;
+use League\Flysystem\StorageAttributes;
+use League\Flysystem\WhitespacePathNormalizer;
+use Throwable;
 use Keboola\Component\UserException;
 use Keboola\FtpExtractor\Exception\ApplicationException;
 use Keboola\FtpExtractor\Exception\ExceptionConverter;
 use Keboola\Utils\Sanitizer\ColumnNameSanitizer;
-use League\Flysystem\Adapter\AbstractFtpAdapter;
-use League\Flysystem\Filesystem as FtpFilesystem;
+use League\Flysystem\FilesystemAdapter;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Webmozart\Glob\Glob;
-use Retry\RetryProxy;
-use Retry\Policy\SimpleRetryPolicy;
-use Retry\BackOff\ExponentialBackOffPolicy;
 
 class FtpExtractor
 {
@@ -24,14 +24,16 @@ class FtpExtractor
     private const FILE_TIMESTAMP_KEY = 'timestamp';
     private const FILE_SOURCE_KEY = 'source-path';
     private const LOGGER_INFO_LOOP = '10';
-    private const CONNECTION_RETRIES = 3;
-    private const RETRY_BACKOFF = 300;
 
-    private FtpFilesystem $ftpFilesystem;
+    private FilesystemAdapter $ftpFilesystem;
+
+    private Config $config;
 
     private bool $onlyNewFiles;
 
     private array $filesToDownload;
+
+    private PathNormalizer $pathNormalizer;
 
     private FileStateRegistry $registry;
 
@@ -40,14 +42,14 @@ class FtpExtractor
     private Filesystem $fs;
 
     public function __construct(
-        bool $onlyNewFiles,
-        FtpFilesystem $ftpFs,
+        Config $config,
         FileStateRegistry $registry,
         LoggerInterface $logger
     ) {
-        $this->ftpFilesystem = $ftpFs;
-        $this->onlyNewFiles = $onlyNewFiles;
+        $this->config = $config;
+        $this->onlyNewFiles = $config->isOnlyForNewFiles();
         $this->filesToDownload = [];
+        $this->pathNormalizer = new WhitespacePathNormalizer();
         $this->registry = $registry;
         $this->logger = $logger;
         $this->fs = new Filesystem();
@@ -55,22 +57,28 @@ class FtpExtractor
 
     public function copyFiles(string $sourcePath, string $destinationPath): int
     {
-        try {
-            /** @var AbstractFtpAdapter $adapter */
-            $adapter = $this->ftpFilesystem->getAdapter();
-            $this->logger->info('Connecting to host ...');
-
-            $this->createRetryProxy()->call(static function () use ($adapter): void {
-                $adapter->getConnection();
-            });
-
-            $this->logger->info('Connection successful');
-        } catch (\Throwable $e) {
-            ExceptionConverter::handleCopyFilesException($e);
-        }
-
+        $this->connect();
         $this->prepareToDownloadFolder($sourcePath, $destinationPath);
         return $this->download();
+    }
+
+    private function connect(): void
+    {
+        $this->logger->info('Connecting to host ...');
+        RetryProxyFactory::createRetryProxy($this->logger)->call(function (): void {
+            try {
+                $this->ftpFilesystem = AdapterFactory::getAdapter($this->config);
+                $this->testConnection();
+            } catch (\Throwable $e) {
+                throw ExceptionConverter::handleCommonException($e);
+            }
+        });
+        $this->logger->info('Connection successful');
+    }
+
+    private function testConnection(): void
+    {
+        $this->ftpFilesystem->fileExists('foo.bar.connection.test');
     }
 
     private function prepareToDownloadFolder(string $sourcePath, string $destinationPath): void
@@ -95,12 +103,12 @@ class FtpExtractor
             $timestamp = 0;
             if ($this->onlyNewFiles) {
                 try {
-                    $timestamp = (int) $this->ftpFilesystem->getTimestamp($item['path']);
+                    $timestamp = (int) $this->ftpFilesystem->lastModified($item['path'])->lastModified();
                     if (!$this->registry->shouldBeFileUpdated($item['path'], $timestamp)) {
                         continue;
                     }
-                } catch (\Throwable $e) {
-                    ExceptionConverter::handlePrepareToDownloadException($e);
+                } catch (Throwable $e) {
+                    throw ExceptionConverter::handlePrepareToDownloadException($e);
                 }
             }
             $destination = $destinationPath . '/' . strtr($item['path'], ['/' => '-']);
@@ -120,16 +128,25 @@ class FtpExtractor
         $items = [];
         try {
             if (Glob::getStaticPrefix($absSourcePath) === $absSourcePath) { //means is file
-                $file = $this->ftpFilesystem->get($absSourcePath);
+                $isFile = $this->ftpFilesystem->visibility($absSourcePath)->isFile();
                 $items[] = [
-                    'path' => $file->getPath(),
-                    'type' => ($file->isFile()) ? ItemFilter::FTP_FILETYPE_FILE : '',
+                    'path' => $absSourcePath,
+                    'type' => $isFile ? ItemFilter::FTP_FILETYPE_FILE : '',
                 ];
             } else { //means is glob based path
                 $this->logger->info("Fetching list of files in base path");
                 $basePath = Glob::getBasePath($absSourcePath);
-                $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
+
+                /** @var StorageAttributes[] $itemsIterable */
+                $itemsIterable = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
+                foreach ($itemsIterable as $item) {
+                    $items[] = [
+                        'path' => $this->pathNormalizer->normalizePath($item->path()),
+                        'type' => $item->type() === StorageAttributes::TYPE_FILE ? ItemFilter::FTP_FILETYPE_FILE : '',
+                    ];
+                }
             }
+
             $countBeforeFilter = count($items);
             $this->logger->info(
                 sprintf(
@@ -145,7 +162,7 @@ class FtpExtractor
                 )
             );
         } catch (\Throwable $e) {
-            ExceptionConverter::handlePrepareToDownloadException($e);
+            throw ExceptionConverter::handlePrepareToDownloadException($e);
         }
         $this->logger->info(sprintf("Base path contains %s files(s)", count($items)));
         return $items;
@@ -175,35 +192,19 @@ class FtpExtractor
         $localPath = $file[self::FILE_DESTINATION_KEY];
         $ftpPath = $file[self::FILE_SOURCE_KEY];
 
-        /** @var AbstractFtpAdapter $adapter */
-        $adapter = $this->ftpFilesystem->getAdapter();
-
-        try {
-            $proxy = $this->createRetryProxy();
-            $proxy->call(function () use ($localPath, $ftpPath, $adapter, $proxy): void {
-                // Reconnect on error, connection is created automatically
-                if ($proxy->getTryCount() > 0) {
-                    $adapter->disconnect();
-                }
-
-                $ftpSize = $this->ftpFilesystem->getSize($ftpPath);
-                $this->fs->dumpFile($localPath, (string) $this->ftpFilesystem->read($ftpPath));
+        RetryProxyFactory::createRetryProxy($this->logger)->call(function () use ($localPath, $ftpPath): void {
+            try {
+                /** @var int $ftpSize */
+                $ftpSize = $this->ftpFilesystem->fileSize($ftpPath)->fileSize();
+                $this->fs->dumpFile($localPath, $this->ftpFilesystem->readStream($ftpPath));
                 $localSize = filesize($localPath);
                 $this->checkFileSize($localPath, $ftpPath, $localSize, $ftpSize);
-            });
-        } catch (\Throwable $e) {
-            ExceptionConverter::handleDownloadException($e);
-        }
-        $this->registry->updateOutputState($file[self::FILE_SOURCE_KEY], $file[self::FILE_TIMESTAMP_KEY]);
-    }
+            } catch (Throwable $e) {
+                throw ExceptionConverter::handleDownloadException($e, $ftpPath);
+            }
+        });
 
-    private function createRetryProxy(): RetryProxy
-    {
-        return new RetryProxy(
-            new SimpleRetryPolicy(self::CONNECTION_RETRIES),
-            new ExponentialBackOffPolicy(self::RETRY_BACKOFF),
-            $this->logger
-        );
+        $this->registry->updateOutputState($file[self::FILE_SOURCE_KEY], $file[self::FILE_TIMESTAMP_KEY]);
     }
 
     /**
@@ -244,6 +245,6 @@ class FtpExtractor
         for ($i = 0; ($size / 1024) > 0.9; $i++) {
             $size /= 1024;
         }
-        return round($size, $precision).['B','kB','MB','GB','TB','PB','EB','ZB','YB'][$i];
+        return round($size, $precision) . ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][$i];
     }
 }
