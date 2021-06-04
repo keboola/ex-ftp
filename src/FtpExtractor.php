@@ -147,6 +147,8 @@ class FtpExtractor
                 }
             }
 
+            var_export($items);
+
             $countBeforeFilter = count($items);
             $this->logger->info(
                 sprintf(
