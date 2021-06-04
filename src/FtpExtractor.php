@@ -27,35 +27,17 @@ class FtpExtractor
     private const CONNECTION_RETRIES = 3;
     private const RETRY_BACKOFF = 300;
 
-    /**
-     * @var FtpFilesystem
-     */
-    private $ftpFilesystem;
+    private FtpFilesystem $ftpFilesystem;
 
-    /**
-     * @var bool
-     */
-    private $onlyNewFiles;
+    private bool $onlyNewFiles;
 
-    /**
-     * @var array
-     */
-    private $filesToDownload;
+    private array $filesToDownload;
 
-    /**
-     * @var FileStateRegistry
-     */
-    private $registry;
+    private FileStateRegistry $registry;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private LoggerInterface $logger;
 
-    /**
-     * @var Filesystem
-     */
-    private $fs;
+    private Filesystem $fs;
 
     public function __construct(
         bool $onlyNewFiles,
