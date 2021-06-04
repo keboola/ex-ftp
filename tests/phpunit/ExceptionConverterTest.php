@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Keboola\FtpExtractor\Tests;
 
 use Keboola\FtpExtractor\Exception\ApplicationException;
-use League\Flysystem\ConnectionRuntimeException;
-use League\Flysystem\Sftp\ConnectionErrorException;
-use League\Flysystem\Sftp\InvalidRootException;
+use League\Flysystem\Ftp\UnableToConnectToFtpHost;
+use League\Flysystem\Ftp\UnableToSetFtpOption;
+use League\Flysystem\PhpseclibV2\UnableToConnectToSftpHost;
+use League\Flysystem\UnableToReadFile;
 use PHPUnit\Framework\TestCase;
 use Keboola\FtpExtractor\Exception\ExceptionConverter;
-use League\Flysystem\FileNotFoundException;
 use Keboola\Component\UserException;
 
 class ExceptionConverterTest extends TestCase
@@ -30,7 +30,7 @@ class ExceptionConverterTest extends TestCase
         try {
             throw $throwException;
         } catch (\Throwable $e) {
-            ExceptionConverter::handleCopyFilesException($e);
+            throw ExceptionConverter::handleCopyFilesException($e);
         }
     }
 
@@ -49,7 +49,7 @@ class ExceptionConverterTest extends TestCase
         try {
             throw $throwException;
         } catch (\Throwable $e) {
-            ExceptionConverter::handlePrepareToDownloadException($e);
+            throw ExceptionConverter::handlePrepareToDownloadException($e);
         }
     }
 
@@ -68,7 +68,7 @@ class ExceptionConverterTest extends TestCase
         try {
             throw $throwException;
         } catch (\Throwable $e) {
-            ExceptionConverter::handleDownloadException($e);
+            throw ExceptionConverter::handleDownloadException($e, '/foo/bar.jpg');
         }
     }
 
@@ -78,22 +78,22 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 'Foo bar',
-                new InvalidRootException('Foo bar'),
+                new UnableToSetFtpOption('Foo bar'),
             ],
             [
                 UserException::class,
                 'Foo bar',
-                new ConnectionErrorException('Foo bar'),
+                new UnableToConnectToSftpHost('Foo bar'),
             ],
             [
                 UserException::class,
                 'Foo bar',
-                new FileNotFoundException('Foo bar'),
+                new UnableToReadFile('Foo bar'),
             ],
             [
                 UserException::class,
                 'Could not login with username: foo bar',
-                new ConnectionErrorException('Could not login with username: foo bar'),
+                new UnableToConnectToFtpHost('Could not login with username: foo bar'),
             ],
             [
                 UserException::class,
@@ -104,28 +104,13 @@ class ExceptionConverterTest extends TestCase
             ],
             [
                 UserException::class,
-                'Could not connect to server to verify public key.',
-                new ConnectionRuntimeException('Could not connect to server to verify public key.'),
-            ],
-            [
-                UserException::class,
-                'The authenticity of host foo can\'t be established.',
+                'The authenticity of host foo can\'t be established',
                 new \RuntimeException('The authenticity of host foo can\'t be established.'),
             ],
             [
                 UserException::class,
                 'Cannot connect to foo bar',
                 new \RuntimeException('Cannot connect to foo bar'),
-            ],
-            [
-                UserException::class,
-                'Root is invalid or does not exist: /foo/bar',
-                new InvalidRootException('Root is invalid or does not exist: /foo/bar'),
-            ],
-            [
-                UserException::class,
-                'Foo bar',
-                new ConnectionErrorException('Foo bar'),
             ],
             [
                 ApplicationException::class,
@@ -145,14 +130,14 @@ class ExceptionConverterTest extends TestCase
 
     public function downloadExceptionMessageProvider(): array
     {
-        $filePtah = '/foo/bar.jpg';
+        $filePath = '/foo/bar.jpg';
         $progressMessage = 'Operation now in progress (115)';
 
         return [
             [
                 UserException::class,
-                sprintf('Error while trying to download file: File not found at path: %s', $filePtah),
-                new FileNotFoundException($filePtah),
+                sprintf('Error while trying to download file "%s": Some error.', $filePath),
+                new UnableToReadFile('Some error.'),
             ],
             [
                 UserException::class,

@@ -10,15 +10,9 @@ class FileStateRegistry
     public const NEWEST_TIMESTAMP_KEY = 'newest-timestamp';
     public const FILES_WITH_NEWEST_TIMESTAMP_KEY = 'last-timestamp-files';
 
-    /**
-     * @var int
-     */
-    private $newestTimestamp;
+    private int $newestTimestamp;
 
-    /**
-     * @var array
-     */
-    private $filesWithNewestTimestamp;
+    private array $filesWithNewestTimestamp;
 
     public function __construct(array $stateFile)
     {
@@ -58,6 +52,7 @@ class FileStateRegistry
 
     public function getFileStates(): array
     {
+        sort($this->filesWithNewestTimestamp);
         return [
             self::NEWEST_TIMESTAMP_KEY => $this->newestTimestamp,
             self::FILES_WITH_NEWEST_TIMESTAMP_KEY => $this->filesWithNewestTimestamp,

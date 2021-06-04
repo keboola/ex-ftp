@@ -11,6 +11,7 @@ use Keboola\DatadirTests\DatadirTestSpecificationInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\Process\Process;
 
 class DatadirTest extends AbstractDatadirTestCase
 {
@@ -85,7 +86,7 @@ class DatadirTest extends AbstractDatadirTestCase
         $outputState = [
             "ex-ftp-state" => [
                 "newest-timestamp" => $timestamps["file_1.txt"],
-                "last-timestamp-files" => ["file_1.txt", "Zvlášť zákeřný učeň s ďolíčky běží podél zóny úlů.csv"],
+                "last-timestamp-files" => ["Zvlášť zákeřný učeň s ďolíčky běží podél zóny úlů.csv", "file_1.txt"],
             ],
         ];
         JsonHelper::writeFile(__DIR__ . '/only-new-files/expected/data/out/state.json', $outputState);
@@ -95,7 +96,7 @@ class DatadirTest extends AbstractDatadirTestCase
         $inputState = [
             "ex-ftp-state" => [
                 "newest-timestamp" => $timestamps["file_1.txt"],
-                "last-timestamp-files" => ["file_1.txt", "Zvlášť zákeřný učeň s ďolíčky běží podél zóny úlů.csv"],
+                "last-timestamp-files" => ["Zvlášť zákeřný učeň s ďolíčky běží podél zóny úlů.csv", "file_1.txt"],
             ],
         ];
         JsonHelper::writeFile(__DIR__ . '/new-files-from-old-state/source/data/in/state.json', $inputState);

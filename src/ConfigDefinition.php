@@ -68,7 +68,7 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->end()
                 ->integerNode('timeout')
                     ->min(1)
-                    ->defaultValue(60)
+                    ->defaultValue(120)
                 ->end()
                 ->enumNode('listing')
                     ->values([self::LISTING_MANUAL, self::LISTING_RECURSION])
