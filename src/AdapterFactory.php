@@ -9,7 +9,6 @@ use Keboola\FtpExtractor\Exception\ExceptionConverter;
 use League\Flysystem\Ftp\FtpConnectionProvider;
 use League\Flysystem\Ftp\RawListFtpConnectivityChecker;
 use Throwable;
-use Keboola\Component\UserException;
 use League\Flysystem\FilesystemAdapter;
 use League\Flysystem\Ftp\FtpAdapter;
 use League\Flysystem\Ftp\FtpConnectionOptions;
@@ -23,10 +22,10 @@ class AdapterFactory
         $options = $config->getConnectionConfig();
         switch ($config->getConnectionType()) {
             case ConfigDefinition::CONNECTION_TYPE_FTP:
-                return static::createFtpAdapter($options, $config->getPathToCopy());
+                return static::createFtpAdapter($options);
             case ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT:
                 $options['ssl'] = true;
-                return static::createFtpAdapter($options, $config->getPathToCopy());
+                return static::createFtpAdapter($options);
             case ConfigDefinition::CONNECTION_TYPE_SFTP:
                 if ($config->getPrivateKey() !== '') {
                     $options['privateKey'] = $config->getPrivateKey();
@@ -37,14 +36,14 @@ class AdapterFactory
         }
     }
 
-    public static function createFtpAdapter(array $options, string $pathToCopy): FilesystemAdapter
+    public static function createFtpAdapter(array $options): FilesystemAdapter
     {
         $connectionProvider = new FtpConnectionProvider();
         $options['root'] = self::getFtpRoot(
             $connectionProvider,
-            FtpConnectionOptions::fromArray($options),
-            $pathToCopy
+            FtpConnectionOptions::fromArray($options)
         );
+        var_dump($options['root']);
         return new FtpAdapter(
             FtpConnectionOptions::fromArray($options),
             $connectionProvider,
@@ -64,13 +63,8 @@ class AdapterFactory
 
     private static function getFtpRoot(
         FtpConnectionProvider $connectionProvider,
-        FtpConnectionOptions $options,
-        string $sourcePath
+        FtpConnectionOptions $options
     ): string {
-        if (substr($sourcePath, 0, 1) === '/') {
-            return '/';
-        }
-
         try {
             $connection = $connectionProvider->createConnection($options);
             $pwd = (string) ftp_pwd($connection);

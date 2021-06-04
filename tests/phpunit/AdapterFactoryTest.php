@@ -33,8 +33,8 @@ class AdapterFactoryTest extends TestCase
             [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_FTP), FtpAdapter::class];
         yield 'sftp' =>
             [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SFTP), SftpAdapter::class];
-         yield 'ftp-ssl' =>
-            [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT), FtpAdapter::class];
+        // yield 'ftp-ssl' =>
+        //    [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT), FtpAdapter::class];
     }
 
     public function testWrongConnectionType(): void
