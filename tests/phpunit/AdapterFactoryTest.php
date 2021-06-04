@@ -8,8 +8,8 @@ use Keboola\Component\UserException;
 use Keboola\FtpExtractor\AdapterFactory;
 use Keboola\FtpExtractor\Config;
 use Keboola\FtpExtractor\ConfigDefinition;
-use League\Flysystem\Adapter\Ftp;
-use League\Flysystem\Sftp\SftpAdapter;
+use League\Flysystem\Ftp\FtpAdapter;
+use League\Flysystem\PhpseclibV2\SftpAdapter;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
@@ -27,13 +27,14 @@ class AdapterFactoryTest extends TestCase
         );
     }
 
-    public function adapterConfigProvider(): array
+    public function adapterConfigProvider(): iterable
     {
-        return [
-            [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_FTP), Ftp::class],
-            [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SFTP), SftpAdapter::class],
-            [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT), Ftp::class],
-        ];
+        yield 'ftp' =>
+            [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_FTP), FtpAdapter::class];
+        yield 'sftp' =>
+            [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SFTP), SftpAdapter::class];
+         yield 'ftp-ssl' =>
+            [$this->provideTestConfig(ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT), FtpAdapter::class];
     }
 
     public function testWrongConnectionType(): void
@@ -59,7 +60,7 @@ class AdapterFactoryTest extends TestCase
             new ConfigDefinition()
         );
         $this->expectException(UserException::class);
-        $this->expectExceptionMessageMatches('/Could not login/');
+        $this->expectExceptionMessageMatches('/Unable to authenticate using a password/');
         AdapterFactory::getAdapter($config);
     }
 
