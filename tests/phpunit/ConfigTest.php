@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor\Tests;
 
+use Generator;
 use Keboola\FtpExtractor\Config;
 use Keboola\FtpExtractor\ConfigDefinition;
 use PHPUnit\Framework\TestCase;
@@ -43,7 +44,6 @@ class ConfigTest extends TestCase
         $this->assertSame($recurseManually, $config->getConnectionConfig()['recurseManually']);
     }
 
-
     public function testInvalidListingOption(): void
     {
         $configArray = [
@@ -64,5 +64,85 @@ class ConfigTest extends TestCase
             $configArray,
             new ConfigDefinition()
         );
+    }
+
+    /**
+     * @dataProvider invalidApprovedHostnameDataProvider
+     */
+    public function testInvalidApprovedHostname(array $approvedHostnameConfig): void
+    {
+        $configArray = [
+            'image_parameters' => [
+                'approvedHostnames' => [$approvedHostnameConfig],
+            ],
+            'parameters' => [
+                'host' => 'hostName',
+                'username' => 'ftpuser',
+                '#password' => 'userpass',
+                'port' => 21,
+                'path' => 'rel',
+                'connectionType' => 'SFTP',
+            ],
+        ];
+
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('Hostname "hostName" with port "21" is not approved.');
+        new Config(
+            $configArray,
+            new ConfigDefinition()
+        );
+    }
+
+    public function testValidApprovedHostname(): void
+    {
+        $configArray = [
+            'image_parameters' => [
+                'approvedHostnames' => [
+                    [
+                        'host' => 'ftpHost',
+                        'port' => 21,
+                    ],
+                ],
+            ],
+            'parameters' => [
+                'host' => 'ftpHost',
+                'username' => 'ftpuser',
+                '#password' => 'userpass',
+                'port' => 21,
+                'path' => 'rel',
+                'connectionType' => 'SFTP',
+            ],
+        ];
+
+        $config = new Config(
+            $configArray,
+            new ConfigDefinition()
+        );
+
+        $this->assertEquals(Config::class, get_class($config));
+    }
+
+    public function invalidApprovedHostnameDataProvider(): Generator
+    {
+        yield "invalid-host" => [
+            [
+                'host' => 'invalidHost',
+                'port' => 21,
+            ],
+        ];
+
+        yield "invalid-port" => [
+            [
+                'host' => 'hostName',
+                'port' => 22,
+            ],
+        ];
+
+        yield "invalid-both" => [
+            [
+                'host' => 'invalidHost',
+                'port' => 22,
+            ],
+        ];
     }
 }
