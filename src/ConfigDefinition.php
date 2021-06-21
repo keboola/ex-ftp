@@ -6,6 +6,8 @@ namespace Keboola\FtpExtractor;
 
 use Keboola\Component\Config\BaseConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class ConfigDefinition extends BaseConfigDefinition
 {
@@ -15,6 +17,31 @@ class ConfigDefinition extends BaseConfigDefinition
 
     public const LISTING_RECURSION = 'recursion';
     public const LISTING_MANUAL = 'manual';
+
+    protected function getRootDefinition(TreeBuilder $treeBuilder): ArrayNodeDefinition
+    {
+        $rootNode = parent::getRootDefinition($treeBuilder);
+
+        $rootNode->validate()->always(function ($v) {
+            if (isset($v['image_parameters']['approvedHostnames'])) {
+                foreach ($v['image_parameters']['approvedHostnames'] as $approvedHostname) {
+                    if ($v['parameters']['host'] === $approvedHostname['host'] &&
+                        $v['parameters']['port'] === $approvedHostname['port']
+                    ) {
+                        return $v;
+                    }
+                }
+                throw new InvalidConfigurationException(sprintf(
+                    'Hostname "%s" with port "%s" is not approved.',
+                    $v['parameters']['host'],
+                    $v['parameters']['port']
+                ));
+            }
+            return $v;
+        })->end();
+
+        return $rootNode;
+    }
 
     protected function getParametersDefinition(): ArrayNodeDefinition
     {
