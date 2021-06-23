@@ -27,4 +27,4 @@ jobs:
           docker pull quay.io/keboola/syrup-cli:latest
       - name: Deploy
         if: startsWith(github.ref, 'refs/tags/')
-        run: ./deploy.sh
+        run: ./deployMultiple.sh
