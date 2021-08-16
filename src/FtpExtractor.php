@@ -59,10 +59,10 @@ class FtpExtractor
     private $fs;
 
     public function __construct(
-        bool $onlyNewFiles,
-        FtpFilesystem $ftpFs,
+        bool              $onlyNewFiles,
+        FtpFilesystem     $ftpFs,
         FileStateRegistry $registry,
-        LoggerInterface $logger
+        LoggerInterface   $logger
     ) {
         $this->ftpFilesystem = $ftpFs;
         $this->onlyNewFiles = $onlyNewFiles;
@@ -196,10 +196,12 @@ class FtpExtractor
 
         try {
             $this->createRetryProxy()->call(function () use ($localPath, $ftpPath): void {
-                $ftpSize = $this->ftpFilesystem->getSize($ftpPath);
+                $ftpSize = $this->getFileSize($ftpPath);
                 $this->fs->dumpFile($localPath, (string) $this->ftpFilesystem->read($ftpPath));
-                $localSize = filesize($localPath);
-                $this->checkFileSize($localPath, $ftpPath, $localSize, $ftpSize);
+                if ($ftpSize) {
+                    $localSize = filesize($localPath);
+                    $this->checkFileSize($localPath, $ftpPath, $localSize, $ftpSize);
+                }
             });
         } catch (\Throwable $e) {
             ExceptionConverter::handleDownloadException($e);
@@ -214,6 +216,22 @@ class FtpExtractor
             new ExponentialBackOffPolicy(self::RETRY_BACKOFF),
             $this->logger
         );
+    }
+
+    private function getFileSize(string $ftpPath): int
+    {
+        try {
+            $ftpSize = $this->ftpFilesystem->getSize($ftpPath);
+            if (is_int($ftpSize)) {
+                return $ftpSize;
+            }
+        } catch (\Throwable $e) {
+            $this->logger->warning(sprintf('Cannot get size of the FTP file "%s". %s', $ftpPath, $e->getMessage()));
+            return 0;
+        }
+
+        $this->logger->warning(sprintf('Cannot get size of the FTP file "%s".', $ftpPath));
+        return 0;
     }
 
     /**
@@ -254,6 +272,6 @@ class FtpExtractor
         for ($i = 0; ($size / 1024) > 0.9; $i++) {
             $size /= 1024;
         }
-        return round($size, $precision).['B','kB','MB','GB','TB','PB','EB','ZB','YB'][$i];
+        return round($size, $precision) . ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'][$i];
     }
 }
