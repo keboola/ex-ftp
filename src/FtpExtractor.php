@@ -197,7 +197,7 @@ class FtpExtractor
         try {
             $this->createRetryProxy()->call(function () use ($localPath, $ftpPath): void {
                 $ftpSize = $this->getFileSize($ftpPath);
-                $this->fs->dumpFile($localPath, (string) $this->ftpFilesystem->read($ftpPath));
+                $this->fs->dumpFile($localPath, $this->ftpFilesystem->readStream($ftpPath));
                 if ($ftpSize) {
                     $localSize = filesize($localPath);
                     $this->checkFileSize($localPath, $ftpPath, $localSize, $ftpSize);
