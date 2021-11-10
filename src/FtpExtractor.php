@@ -197,7 +197,11 @@ class FtpExtractor
         try {
             $this->createRetryProxy()->call(function () use ($localPath, $ftpPath): void {
                 $ftpSize = $this->getFileSize($ftpPath);
-                $this->fs->dumpFile($localPath, $this->ftpFilesystem->readStream($ftpPath));
+                $stream = $this->ftpFilesystem->readStream($ftpPath);
+                if ($stream === false) {
+                    throw new \Exception(sprintf('Downloading of file "%s" failed.', $ftpPath));
+                }
+                $this->fs->dumpFile($localPath, $stream);
                 if ($ftpSize) {
                     $localSize = filesize($localPath);
                     $this->checkFileSize($localPath, $ftpPath, $localSize, $ftpSize);
