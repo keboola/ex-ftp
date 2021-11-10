@@ -199,7 +199,7 @@ class FtpExtractor
                 $ftpSize = $this->getFileSize($ftpPath);
                 $stream = $this->ftpFilesystem->readStream($ftpPath);
                 if ($stream === false) {
-                    throw new \Exception(sprintf('Downloading of file "%s" failed.', $ftpPath));
+                    throw new UserException(sprintf('Downloading of file "%s" failed.', $ftpPath));
                 }
                 $this->fs->dumpFile($localPath, $stream);
                 if ($ftpSize) {
