@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
-use http\Header\Parser;
 use Keboola\Component\UserException;
 use Keboola\FtpExtractor\Exception\ApplicationException;
 use Keboola\FtpExtractor\Exception\ExceptionConverter;
@@ -13,6 +12,7 @@ use League\Flysystem\Adapter\AbstractFtpAdapter;
 use League\Flysystem\Filesystem as FtpFilesystem;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Filesystem\Filesystem;
+use Throwable;
 use Webmozart\Glob\Glob;
 use Retry\RetryProxy;
 use Retry\Policy\SimpleRetryPolicy;
@@ -84,7 +84,7 @@ class FtpExtractor
             });
 
             $this->logger->info('Connection successful');
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             ExceptionConverter::handleCopyFilesException($e);
         }
 
@@ -115,10 +115,11 @@ class FtpExtractor
             if ($this->onlyNewFiles) {
                 try {
                     $timestamp = (int) $this->ftpFilesystem->getTimestamp($item['path']);
+                    $this->logger->info(sprintf('file: %s; timestamp: %s', $item['path'], $timestamp));
                     if (!$this->registry->shouldBeFileUpdated($item['path'], $timestamp)) {
                         continue;
                     }
-                } catch (\Throwable $e) {
+                } catch (Throwable $e) {
                     ExceptionConverter::handlePrepareToDownloadException($e);
                 }
             }
@@ -163,7 +164,7 @@ class FtpExtractor
                     $countBeforeFilter - count($items)
                 )
             );
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             ExceptionConverter::handlePrepareToDownloadException($e);
         }
         $this->logger->info(sprintf("Base path contains %s files(s)", count($items)));
@@ -207,7 +208,7 @@ class FtpExtractor
                     $this->checkFileSize($localPath, $ftpPath, $localSize, $ftpSize);
                 }
             });
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             ExceptionConverter::handleDownloadException($e);
         }
         $this->registry->updateOutputState($file[self::FILE_SOURCE_KEY], $file[self::FILE_TIMESTAMP_KEY]);
@@ -229,7 +230,7 @@ class FtpExtractor
             if (is_int($ftpSize)) {
                 return $ftpSize;
             }
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             $this->logger->warning(sprintf('Cannot get size of the FTP file "%s". %s', $ftpPath, $e->getMessage()));
             return 0;
         }

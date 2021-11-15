@@ -51,7 +51,7 @@ class FileStateRegistry
         if ($this->newestTimestamp < $timestamp) {
             $this->newestTimestamp = $timestamp;
             $this->filesWithNewestTimestamp = [$remotePath];
-        } else if ($this->newestTimestamp = $timestamp) {
+        } else if ($this->newestTimestamp == $timestamp) {
             $this->filesWithNewestTimestamp[] = $remotePath;
         }
     }
