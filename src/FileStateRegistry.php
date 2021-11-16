@@ -39,6 +39,9 @@ class FileStateRegistry
 
     public function shouldBeFileUpdated(string $remotePath, int $timestamp): bool
     {
+        var_dump($this->newestTimestamp <= $timestamp);
+        var_dump($this->newestTimestamp, $timestamp);
+        var_dump(!in_array($remotePath, $this->filesWithNewestTimestamp));
         if ($this->newestTimestamp <= $timestamp && !in_array($remotePath, $this->filesWithNewestTimestamp)) {
             return true;
         }
@@ -51,7 +54,7 @@ class FileStateRegistry
         if ($this->newestTimestamp < $timestamp) {
             $this->newestTimestamp = $timestamp;
             $this->filesWithNewestTimestamp = [$remotePath];
-        } else if ($this->newestTimestamp = $timestamp) {
+        } else if ($this->newestTimestamp == $timestamp) {
             $this->filesWithNewestTimestamp[] = $remotePath;
         }
     }
