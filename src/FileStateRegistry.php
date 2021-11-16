@@ -53,7 +53,9 @@ class FileStateRegistry
             $this->filesWithNewestTimestamp = [];
         }
 
-        $this->filesWithNewestTimestamp[] = $remotePath;
+        if (!in_array($remotePath, $this->filesWithNewestTimestamp)) {
+            $this->filesWithNewestTimestamp[] = $remotePath;
+        }
     }
 
     public function getFileStates(): array
