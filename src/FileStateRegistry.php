@@ -24,9 +24,13 @@ class FileStateRegistry
     {
         $this->newestTimestamp = 0;
         $this->filesWithNewestTimestamp = [];
+        var_dump(isset($stateFile[self::STATE_FILE_KEY]));
         if (isset($stateFile[self::STATE_FILE_KEY])) {
             $cfg = $stateFile[self::STATE_FILE_KEY];
 
+            var_dump(isset($cfg[self::NEWEST_TIMESTAMP_KEY]));
+            var_dump(isset($cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY]));
+            var_dump($cfg);
             if (isset($cfg[self::NEWEST_TIMESTAMP_KEY])) {
                 $this->newestTimestamp = intval($cfg[self::NEWEST_TIMESTAMP_KEY]);
             }
@@ -34,6 +38,7 @@ class FileStateRegistry
             if (isset($cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY])) {
                 $this->filesWithNewestTimestamp = (array) $cfg[self::FILES_WITH_NEWEST_TIMESTAMP_KEY];
             }
+            var_dump($this->newestTimestamp, $this->filesWithNewestTimestamp);
         }
     }
 
