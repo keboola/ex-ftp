@@ -152,9 +152,9 @@ config option `onlyNewFiles` set to `false` add following to
 `tests/functional/DatadirTest.php`:
 ```php
 $state = [
-    "ex-ftp-state" => [
-        "newest-timestamp" => 0,
-        "last-timestamp-files" => [],
+    "ex_ftp_state" => [
+        "newest_timestamp" => 0,
+        "last_timestamp_files" => [],
     ],
 ];
 JsonHelper::writeFile(__DIR__ . '/###NAME_OF_TEST###/expected/data/out/state.json', $state);
@@ -164,9 +164,9 @@ JsonHelper::writeFile(__DIR__ . '/###NAME_OF_TEST###/expected/data/out/state.jso
 For tests with `onlyNewFiles` set to `true` you have to specify both state.json files:
 ```php
 $state = [
-    "ex-ftp-state" => [
-        "newest-timestamp" => $timestamps["dir1/alone.txt"],
-        "last-timestamp-files" => ["dir1/alone.txt"],
+    "ex_ftp_state" => [
+        "newest_timestamp" => $timestamps["dir1/alone.txt"],
+        "last_timestamp_files" => ["dir1/alone.txt"],
     ],
 ];
 JsonHelper::writeFile(__DIR__ . '/###NAME_OF_TEST###/expected/data/out/state.json', $state);
