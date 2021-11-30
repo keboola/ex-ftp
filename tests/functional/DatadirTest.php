@@ -31,27 +31,27 @@ class DatadirTest extends AbstractDatadirTestCase
 
         // --- normal-donwload test ----
         $state = [
-            "ex-ftp-state" => [
-                "newest-timestamp" => 0,
-                "last-timestamp-files" => [],
+            "ex_ftp_state" => [
+                "newest_timestamp" => 0,
+                "last_timestamp_files" => [],
             ],
         ];
         JsonHelper::writeFile(__DIR__ . '/normal-download/expected/data/out/state.json', $state);
 
         // --- special-chars test ---
         $state = [
-            "ex-ftp-state" => [
-                "newest-timestamp" => 0,
-                "last-timestamp-files" => [],
+            "ex_ftp_state" => [
+                "newest_timestamp" => 0,
+                "last_timestamp_files" => [],
             ],
         ];
         JsonHelper::writeFile(__DIR__ . '/special-chars/expected/data/out/state.json', $state);
 
         // --- nothing-to-update tests ---
         $state = [
-            "ex-ftp-state" => [
-                "newest-timestamp" => $timestamps["dir1/recursive.bin"],
-                "last-timestamp-files" => ["dir1/recursive.bin"],
+            "ex_ftp_state" => [
+                "newest_timestamp" => $timestamps["dir1/recursive.bin"],
+                "last_timestamp_files" => ["dir1/recursive.bin"],
             ],
         ];
         JsonHelper::writeFile(__DIR__ . '/nothing-to-update/expected/data/out/state.json', $state);
@@ -59,33 +59,33 @@ class DatadirTest extends AbstractDatadirTestCase
 
         // --- specific-directory test ----
         $state = [
-            "ex-ftp-state" => [
-                "newest-timestamp" => 0,
-                "last-timestamp-files" => [],
+            "ex_ftp_state" => [
+                "newest_timestamp" => 0,
+                "last_timestamp_files" => [],
             ],
         ];
         JsonHelper::writeFile(__DIR__ . '/specific-directory/expected/data/out/state.json', $state);
 
         // --- manual-recursion test ----
         $state = [
-            "ex-ftp-state" => [
-                "newest-timestamp" => 0,
-                "last-timestamp-files" => [],
+            "ex_ftp_state" => [
+                "newest_timestamp" => 0,
+                "last_timestamp_files" => [],
             ],
         ];
         JsonHelper::writeFile(__DIR__ . '/manual-recursion/expected/data/out/state.json', $state);
 
         // --- only-new-files tests ---
         $inputState = [
-            "ex-ftp-state" => [
-                "newest-timestamp" => 0,
-                "last-timestamp-files" => [],
+            "ex_ftp_state" => [
+                "newest_timestamp" => 0,
+                "last_timestamp_files" => [],
             ],
         ];
         $outputState = [
-            "ex-ftp-state" => [
-                "newest-timestamp" => $timestamps["file_1.txt"],
-                "last-timestamp-files" => ["file_1.txt", "Zvlášť zákeřný učeň s ďolíčky běží podél zóny úlů.csv"],
+            "ex_ftp_state" => [
+                "newest_timestamp" => $timestamps["file_1.txt"],
+                "last_timestamp_files" => ["file_1.txt", "Zvlášť zákeřný učeň s ďolíčky běží podél zóny úlů.csv"],
             ],
         ];
         JsonHelper::writeFile(__DIR__ . '/only-new-files/expected/data/out/state.json', $outputState);
@@ -93,9 +93,9 @@ class DatadirTest extends AbstractDatadirTestCase
 
         // -- new-files-from-old-state test --
         $inputState = [
-            "ex-ftp-state" => [
-                "newest-timestamp" => $timestamps["file_1.txt"],
-                "last-timestamp-files" => ["file_1.txt", "Zvlášť zákeřný učeň s ďolíčky běží podél zóny úlů.csv"],
+            "ex_ftp_state" => [
+                "newest_timestamp" => $timestamps["file_1.txt"],
+                "last_timestamp_files" => ["file_1.txt", "Zvlášť zákeřný učeň s ďolíčky běží podél zóny úlů.csv"],
             ],
         ];
         JsonHelper::writeFile(__DIR__ . '/new-files-from-old-state/source/data/in/state.json', $inputState);
@@ -121,9 +121,9 @@ class DatadirTest extends AbstractDatadirTestCase
             $fs->copy($newCsvFile, $expectingCsvFile);
             $freshTimestamp = (new SplFileInfo($newCsvFile, "", ""))->getMTime();
             $outputState = [
-                "ex-ftp-state" => [
-                    "newest-timestamp" => $freshTimestamp,
-                    "last-timestamp-files" => ["a_brand_new_file.csv"],
+                "ex_ftp_state" => [
+                    "newest_timestamp" => $freshTimestamp,
+                    "last_timestamp_files" => ["a_brand_new_file.csv"],
                 ],
             ];
             JsonHelper::writeFile(__DIR__ . '/new-files-from-old-state/expected/data/out/state.json', $outputState);
