@@ -6,9 +6,9 @@ namespace Keboola\FtpExtractor;
 
 class FileStateRegistry
 {
-    public const STATE_FILE_KEY = 'ex-ftp-state';
-    public const NEWEST_TIMESTAMP_KEY = 'newest-timestamp';
-    public const FILES_WITH_NEWEST_TIMESTAMP_KEY = 'last-timestamp-files';
+    public const STATE_FILE_KEY = 'ex_ftp_state';
+    public const NEWEST_TIMESTAMP_KEY = 'newest_timestamp';
+    public const FILES_WITH_NEWEST_TIMESTAMP_KEY = 'last_timestamp_files';
 
     /**
      * @var int
