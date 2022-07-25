@@ -15,9 +15,18 @@ The configuration requires following properties:
 - `port` - integer (required): Server port (default port is 21)
 - `username` - string (required): User with correct access rights
 - `password` - string (optional): Password for given User
+- `ssh` - object (optional): setting for SSH Proxy
+  - `enabled` - bool (optional): is ssh enabled (`true` if not set)
+  - `keys` - object (required)
+    - `#private` - string (required): Private SSH key
+    - `public` - string (required): Public SSH key
+  - `user` - string (required)
+  - `sshHost` - string (required) - host of SSH Proxy
+  - `sshPort` - string (optional) - port where ssh runs (`22` if not set)
+  - `passivePortRange` - string (required) - port range where passive mode of FTP runs (e.g. `10000:10005`)
 - `path` - string (required): Path to specific file or glob syntax path
-    - FTP(s) uses absolute path
-    - SFTP uses relative path according to user's HOME directory
+   - FTP(s) uses absolute path
+   - SFTP uses relative path according to user's HOME directory
 - `connectionType` - string (required): Type of connection (possible value [FTP|FTPS|SFTP])
 - `privateKey` - string (optional): Possible to use only with SFTP connectionType.
 - `onlyNewFiles` - boolean (optional): Compares timestamp of files from last run and download only new files
@@ -119,6 +128,32 @@ Configuration to download exact file on SFTP server
     } 
 ``` 
 
+
+Configuration to download files using SSH proxy
+(you need to setup `ignorePassiveAddress` to `true` value)
+
+```json
+    {
+        "parameters": {
+            "host":"ftp.example.com",
+            "username": "ftpuser",
+            "#password": "userpass",
+            "ssh": {
+                "enabled": true,
+                "keys": {
+                  "#private": "PRIVATE_KEY",
+                  "public": "PUBLIC_KEY"
+                },
+                "user": "root",
+                "sshHost": "sshproxy",
+                "passivePortRange": "10000:10005"
+            },
+            "port": 22,
+            "path": "files/data.csv",
+            "connectionType": "SFTP"
+        }
+    } 
+``` 
 
 # Development
  
