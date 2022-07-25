@@ -8,6 +8,7 @@ use Keboola\Component\Config\BaseConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use function PHPUnit\Framework\matches;
 
 class ConfigDefinition extends BaseConfigDefinition
 {
@@ -75,16 +76,39 @@ class ConfigDefinition extends BaseConfigDefinition
                 ->arrayNode('ssh')
                     ->children()
                         ->booleanNode('enabled')->defaultFalse()->end()
-                        ->arrayNode('keys')
+                        ->arrayNode('keys')->isRequired()
                             ->children()
-                                ->scalarNode('#private')->end()
-                                ->scalarNode('public')->end()
+                                ->scalarNode('#private')->isRequired()->cannotBeEmpty()->end()
+                                ->scalarNode('public')->isRequired()->cannotBeEmpty()->end()
                             ->end()
                         ->end()
-                        ->scalarNode('user')->end()
-                        ->scalarNode('sshHost')->end()
-                        ->integerNode('sshPort')->end()
-                        ->scalarNode('passivePortRange')->end()
+                        ->scalarNode('user')->isRequired()->cannotBeEmpty()->end()
+                        ->scalarNode('sshHost')->isRequired()->cannotBeEmpty()->end()
+                        ->integerNode('sshPort')->defaultValue(22)->end()
+                        ->scalarNode('passivePortRange')
+                            ->isRequired()
+                            ->validate()->always(function ($val) {
+                                preg_match('/^([0-9]*):([0-9]*)$/', $val, $matches);
+
+                                if (count($matches) !== 3) {
+                                    throw new InvalidConfigurationException(
+                                        'The "passivePortRange" has invalid format.'
+                                    );
+                                }
+
+                                $rangeFrom = $matches[1];
+                                $rangeTo = $matches[2];
+
+                                if ($rangeTo < $rangeFrom) {
+                                    throw new InvalidConfigurationException(
+                                        'The Range From must be less than Range To.'
+                                    );
+                                }
+
+                                return $val;
+                            })->end()
+                            ->cannotBeEmpty()
+                        ->end()
                     ->end()
                 ->end()
                 ->scalarNode('connectionType')
