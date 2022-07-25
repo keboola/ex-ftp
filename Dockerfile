@@ -11,6 +11,8 @@ COPY docker/php-prod.ini /usr/local/etc/php/php.ini
 COPY docker/composer-install.sh /tmp/composer-install.sh
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+        ftp \
+        ssh \
         git \
         unzip \
 	&& rm -r /var/lib/apt/lists/* \

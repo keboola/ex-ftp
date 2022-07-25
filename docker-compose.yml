@@ -6,23 +6,37 @@ services:
     volumes:
       - ./tests/ftpInitContent:/code/tests/ftpInitContent
     links:
+      - sshproxy
       - ftp
+
   dev: &devConfig
     build: .
     volumes:
       - ./:/code
       - ./data:/data
+      - ssh-keys:/root/.ssh:ro
     links:
+      - sshproxy
       - ftp
+
   ftp:
     image: stilliard/pure-ftpd
     environment:
       FTP_USER_NAME: ftpuser
       FTP_USER_PASS: userpass
       FTP_USER_HOME: /home/ftpusers/
+      FTP_PASSIVE_PORTS: 10000:10005
       PUBLICHOST: ftp
     volumes:
       - ./tests/ftpInitContent:/home/ftpusers
+
+  sshproxy:
+    image: keboola/db-component-ssh-proxy:latest
+    volumes:
+      - ssh-keys:/root/.ssh
+    links:
+      - ftp
+
   tests:
       <<: *devConfig
       build:
@@ -31,3 +45,6 @@ services:
       environment:
         - XDEBUG_CONFIG=remote_enable=1 remote_mode=req remote_port=9000 remote_host=172.20.0.1 remote_connect_back=0
         - PHP_IDE_CONFIG=serverName=ex-ftp
+
+volumes:
+  ssh-keys:

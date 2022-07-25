@@ -7,8 +7,8 @@ namespace Keboola\FtpExtractor\Tests;
 use Keboola\Component\UserException;
 use Keboola\FtpExtractor\FileStateRegistry;
 use Keboola\FtpExtractor\FtpExtractor;
+use League\Flysystem\Adapter\AbstractFtpAdapter;
 use League\Flysystem\Adapter\Ftp;
-use League\Flysystem\AdapterInterface;
 use League\Flysystem\Filesystem;
 use League\Flysystem\Sftp\SftpAdapter;
 use Monolog\Handler\TestHandler;
@@ -20,7 +20,7 @@ class ConnectionTest extends TestCase
     /**
      * @dataProvider invalidConnectionProvider
      */
-    public function testFalseConnection(AdapterInterface $adapter): void
+    public function testFalseConnection(AbstractFtpAdapter $adapter): void
     {
         $handler = new TestHandler();
         $extractor = new FtpExtractor(
@@ -42,7 +42,10 @@ class ConnectionTest extends TestCase
 
             foreach ($handler->getRecords() as $count => $record) {
                 if ($count === 0) {
-                    $this->assertEquals('Connecting to host ...', $record['message']);
+                    $this->assertEquals(
+                        sprintf('Connecting to host "%s" on port "%s".', $adapter->getHost(), $adapter->getPort()),
+                        $record['message']
+                    );
                     continue;
                 }
 

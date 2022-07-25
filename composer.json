@@ -4,8 +4,9 @@
         "keboola/php-component": "^8.0",
         "keboola/retry": "^0.5.0",
         "keboola/sanitizer": "^0.1.0",
-        "league/flysystem": "^1.0",
-        "league/flysystem-sftp": "^1.0",
+        "keboola/ssh-tunnel": "^2.0",
+        "league/flysystem": "^1.1",
+        "league/flysystem-sftp": "^1.1",
         "webmozart/glob": "^4.3"
     },
     "require-dev": {
