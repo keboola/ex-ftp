@@ -77,7 +77,11 @@ class FtpExtractor
         try {
             /** @var AbstractFtpAdapter $adapter */
             $adapter = $this->ftpFilesystem->getAdapter();
-            $this->logger->info('Connecting to host ...');
+            $this->logger->info(sprintf(
+                'Connecting to host "%s" on port "%s".',
+                $adapter->getHost(),
+                $adapter->getPort()
+            ));
 
             $this->createRetryProxy()->call(static function () use ($adapter): void {
                 $adapter->getConnection();

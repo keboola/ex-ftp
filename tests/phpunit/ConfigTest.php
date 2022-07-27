@@ -66,6 +66,26 @@ class ConfigTest extends TestCase
         );
     }
 
+    /** @dataProvider invalidSSHDataProvider */
+    public function testInvalidSSHConfig(array $sshConfig, string $expectedMessage): void
+    {
+        $configArray = [
+            'parameters' => [
+                'host' => 'hostName',
+                'username' => 'ftpuser',
+                '#password' => 'userpass',
+                'port' => 21,
+                'path' => 'rel',
+                'connectionType' => 'FTP',
+                'ssh' => $sshConfig,
+            ],
+        ];
+
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage($expectedMessage);
+        new Config($configArray, new ConfigDefinition());
+    }
+    
     /**
      * @dataProvider invalidApprovedHostnameDataProvider
      */
@@ -143,6 +163,92 @@ class ConfigTest extends TestCase
                 'host' => 'invalidHost',
                 'port' => 22,
             ],
+        ];
+    }
+
+    public function invalidSSHDataProvider(): Generator
+    {
+        yield 'missing-keys' => [
+            [
+                'enabled' => true,
+                'sshHost' => 'localhost',
+                'user' => 'user',
+                'passivePortRange' => '10000:10001',
+            ],
+            'The child config "keys" under "root.parameters.ssh" must be configured.',
+        ];
+        yield 'missing-private-key' => [
+            [
+                'enabled' => true,
+                'keys' => [
+                    'public' => 'publicKey',
+                ],
+                'sshHost' => 'localhost',
+                'user' => 'user',
+                'passivePortRange' => '10000:10001',
+            ],
+            'The child config "#private" under "root.parameters.ssh.keys" must be configured.',
+        ];
+        yield 'missing-public-key' => [
+            [
+                'enabled' => true,
+                'keys' => [
+                    '#private' => 'privateKey',
+                ],
+                'sshHost' => 'localhost',
+                'user' => 'user',
+                'passivePortRange' => '10000:10001',
+            ],
+            'The child config "public" under "root.parameters.ssh.keys" must be configured.',
+        ];
+        yield 'missing-ssh-host' => [
+            [
+                'enabled' => true,
+                'keys' => [
+                    '#private' => 'privateKey',
+                    'public' => 'publicKey',
+                ],
+                'user' => 'user',
+                'passivePortRange' => '10000:10001',
+            ],
+            'The child config "sshHost" under "root.parameters.ssh" must be configured.',
+        ];
+        yield 'missing-user' => [
+            [
+                'enabled' => true,
+                'keys' => [
+                    '#private' => 'privateKey',
+                    'public' => 'publicKey',
+                ],
+                'sshHost' => 'localhost',
+                'passivePortRange' => '10000:10001',
+            ],
+            'The child config "user" under "root.parameters.ssh" must be configured.',
+        ];
+        yield 'missing-passivePortRange' => [
+            [
+                'enabled' => true,
+                'keys' => [
+                    '#private' => 'privateKey',
+                    'public' => 'publicKey',
+                ],
+                'sshHost' => 'localhost',
+                'user' => 'user',
+            ],
+            'The child config "passivePortRange" under "root.parameters.ssh" must be configured.',
+        ];
+        yield 'wrong-port-range' => [
+            [
+                'enabled' => true,
+                'keys' => [
+                    '#private' => 'privateKey',
+                    'public' => 'publicKey',
+                ],
+                'sshHost' => 'localhost',
+                'user' => 'user',
+                'passivePortRange' => '10000:9000',
+            ],
+            'The Range From must be less than Range To.',
         ];
     }
 }

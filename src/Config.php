@@ -8,13 +8,19 @@ use Keboola\Component\Config\BaseConfig;
 
 class Config extends BaseConfig
 {
+    public const SSH_PORT = 22;
+
+    private string $host;
+
+    private int $port;
+
     public function getConnectionConfig(): array
     {
         return [
-            'host' => $this->getValue(['parameters', 'host']),
+            'host' => $this->getHost(),
+            'port' => $this->getPort(),
             'username' => $this->getValue(['parameters', 'username']),
             'password' => $this->getValue(['parameters', '#password']),
-            'port' => $this->getValue(['parameters', 'port']),
             'timeout' => $this->getValue(['parameters', 'timeout']),
             'recurseManually' => $this->shouldUseManualRecursion(),
             'ignorePassiveAddress' => $this->ignorePassiveAddress(),
@@ -49,5 +55,50 @@ class Config extends BaseConfig
     public function ignorePassiveAddress(): bool
     {
         return $this->getValue(['parameters', 'ignorePassiveAddress']);
+    }
+
+    public function getHost(): string
+    {
+        return $this->host ?? $this->getValue(['parameters', 'host']);
+    }
+
+    public function getPort(): int
+    {
+        return $this->port ?? $this->getValue(['parameters', 'port']);
+    }
+
+    public function setHost(string $host): void
+    {
+        $this->host = $host;
+    }
+
+    public function setPort(int $port): void
+    {
+        $this->port = $port;
+    }
+
+    public function isSshEnabled(): bool
+    {
+        return $this->getValue(['parameters', 'ssh', 'enabled'], false);
+    }
+
+    public function getSshConfig(int $port, ?int $localPort = null): array
+    {
+        $sshConfig = $this->getValue(['parameters', 'ssh']);
+        $sshConfig['remoteHost'] = $this->getHost();
+        $sshConfig['remotePort'] = $port;
+        $sshConfig['localPort'] = $localPort ?? $port;
+        $sshConfig['sshPort'] = self::SSH_PORT;
+        $sshConfig['privateKey'] = $sshConfig['keys']['#private'];
+        return $sshConfig;
+    }
+
+    public function getFtpPassivePorts(): array
+    {
+        $portRange = $this->getValue(['parameters', 'ssh', 'passivePortRange']);
+
+        list($rangeFrom, $rangeTo) = explode(':', $portRange);
+
+        return range($rangeFrom, $rangeTo);
     }
 }

@@ -47,6 +47,15 @@ class DatadirTest extends AbstractDatadirTestCase
         ];
         JsonHelper::writeFile(__DIR__ . '/special-chars/expected/data/out/state.json', $state);
 
+        // --- simple-ssh test ---
+        $state = [
+            "ex_ftp_state" => [
+                "newest_timestamp" => 0,
+                "last_timestamp_files" => [],
+            ],
+        ];
+        JsonHelper::writeFile(__DIR__ . '/simple-ssh/expected/data/out/state.json', $state);
+
         // --- nothing-to-update tests ---
         $state = [
             "ex_ftp_state" => [
