@@ -20,7 +20,7 @@ class DatadirTest extends AbstractDatadirTestCase
         parent::setUp();
 
         // kill all ssh tunnels
-        $process = new Process(['pkill -f ssh']);
+        $process = new Process(['sh', '-c', 'pgrep ssh | xargs -r kill']);
         $process->run();
 
         $files = (new Finder())->files()->in(__DIR__ . '/../ftpInitContent/');
