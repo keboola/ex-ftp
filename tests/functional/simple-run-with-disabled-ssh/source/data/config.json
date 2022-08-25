@@ -1,8 +1,5 @@
 {
     "parameters": {
-        "ssh": {
-            "enabled": false
-        },
         "host": "ftp",
         "username": "ftpuser",
         "#password": "userpass",
