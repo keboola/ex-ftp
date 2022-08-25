@@ -19,6 +19,14 @@ class ConfigDefinition extends BaseConfigDefinition
     public const LISTING_RECURSION = 'recursion';
     public const LISTING_MANUAL = 'manual';
 
+    private const SSH_REQUIRED_PARAMS = [
+        'user',
+        'sshHost',
+        'sshPort',
+        'passivePortRange',
+        'keys',
+    ];
+
     protected function getRootDefinition(TreeBuilder $treeBuilder): ArrayNodeDefinition
     {
         $rootNode = parent::getRootDefinition($treeBuilder);
@@ -74,19 +82,35 @@ class ConfigDefinition extends BaseConfigDefinition
                     ->defaultValue(21)
                 ->end()
                 ->arrayNode('ssh')
+                    ->validate()->always(function ($val) {
+                        if ($val['enabled'] === false) {
+                            return $val;
+                        }
+
+                        foreach (self::SSH_REQUIRED_PARAMS as $param) {
+                            if (!array_key_exists($param, $val)) {
+                                throw new InvalidConfigurationException(sprintf(
+                                    'The child config "%s" under "root.parameters.ssh" must be configured.',
+                                    $param
+                                ));
+                            }
+                        }
+
+                        return $val;
+                    })
+                    ->end()
                     ->children()
                         ->booleanNode('enabled')->defaultFalse()->end()
-                        ->arrayNode('keys')->isRequired()
+                        ->arrayNode('keys')
                             ->children()
                                 ->scalarNode('#private')->isRequired()->cannotBeEmpty()->end()
                                 ->scalarNode('public')->isRequired()->cannotBeEmpty()->end()
                             ->end()
                         ->end()
-                        ->scalarNode('user')->isRequired()->cannotBeEmpty()->end()
-                        ->scalarNode('sshHost')->isRequired()->cannotBeEmpty()->end()
+                        ->scalarNode('user')->cannotBeEmpty()->end()
+                        ->scalarNode('sshHost')->cannotBeEmpty()->end()
                         ->integerNode('sshPort')->defaultValue(22)->end()
                         ->scalarNode('passivePortRange')
-                            ->isRequired()
                             ->validate()->always(function ($val) {
                                 preg_match('/^([0-9]*):([0-9]*)$/', $val, $matches);
 

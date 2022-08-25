@@ -11,12 +11,17 @@ use Keboola\DatadirTests\DatadirTestSpecificationInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\Process\Process;
 
 class DatadirTest extends AbstractDatadirTestCase
 {
     protected function setUp(): void
     {
         parent::setUp();
+
+        // kill all ssh tunnels
+        $process = new Process(['sh', '-c', 'pgrep ssh | xargs -r kill']);
+        $process->run();
 
         $files = (new Finder())->files()->in(__DIR__ . '/../ftpInitContent/');
         $timestamps = [];
