@@ -7,6 +7,7 @@ namespace Keboola\FtpExtractor\Tests;
 use Generator;
 use Keboola\FtpExtractor\Config;
 use Keboola\FtpExtractor\ConfigDefinition;
+use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
@@ -84,6 +85,31 @@ class ConfigTest extends TestCase
         $this->expectException(InvalidConfigurationException::class);
         $this->expectExceptionMessage($expectedMessage);
         new Config($configArray, new ConfigDefinition());
+    }
+
+    /** @dataProvider validSSHDataProvider */
+    public function testValidSSHConfig(array $sshConfig): void
+    {
+        $configArray = [
+            'parameters' => [
+                'host' => 'hostName',
+                'username' => 'ftpuser',
+                '#password' => 'userpass',
+                'port' => 21,
+                'path' => 'rel',
+                'connectionType' => 'FTP',
+                'onlyNewFiles' => false,
+                '#privateKey' => '',
+                'timeout' => 60,
+                'listing' => 'recursion',
+                'ignorePassiveAddress' => false,
+                'ssh' => $sshConfig,
+            ],
+        ];
+
+        $config = new Config($configArray, new ConfigDefinition());
+
+        Assert::assertEquals($configArray, $config->getData());
     }
     
     /**
@@ -249,6 +275,37 @@ class ConfigTest extends TestCase
                 'passivePortRange' => '10000:9000',
             ],
             'The Range From must be less than Range To.',
+        ];
+    }
+
+    public function validSSHDataProvider(): Generator
+    {
+        yield 'stringPort' => [
+            [
+                'enabled' => true,
+                'keys' => [
+                    '#private' => 'privateKey',
+                    'public' => 'publicKey',
+                ],
+                'sshHost' => 'localhost',
+                'sshPort' => '12345',
+                'user' => 'user',
+                'passivePortRange' => '10000:11000',
+            ],
+        ];
+
+        yield 'intPort' => [
+            [
+                'enabled' => true,
+                'keys' => [
+                    '#private' => 'privateKey',
+                    'public' => 'publicKey',
+                ],
+                'sshHost' => 'localhost',
+                'sshPort' => 12345,
+                'user' => 'user',
+                'passivePortRange' => '10000:11000',
+            ],
         ];
     }
 }
