@@ -109,7 +109,12 @@ class ConfigDefinition extends BaseConfigDefinition
                         ->end()
                         ->scalarNode('user')->cannotBeEmpty()->end()
                         ->scalarNode('sshHost')->cannotBeEmpty()->end()
-                        ->integerNode('sshPort')->defaultValue(22)->end()
+                        ->integerNode('sshPort')
+                            ->beforeNormalization()->always(function ($v) {
+                                return (int) $v;
+                            })->end()
+                            ->defaultValue(22)
+                        ->end()
                         ->scalarNode('passivePortRange')
                             ->validate()->always(function ($val) {
                                 preg_match('/^([0-9]*):([0-9]*)$/', $val, $matches);
