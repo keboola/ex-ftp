@@ -5,6 +5,7 @@ services:
     image: keboola/ex-ftp
     volumes:
       - ./tests/ftpInitContent:/code/tests/ftpInitContent
+      - ssh-keys:/root/.ssh:ro
     links:
       - sshproxy
       - ftp

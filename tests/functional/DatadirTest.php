@@ -15,6 +15,14 @@ use Symfony\Component\Process\Process;
 
 class DatadirTest extends AbstractDatadirTestCase
 {
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+
+        putenv('SSH_PRIVATE_KEY=' . file_get_contents('/root/.ssh/id_rsa'));
+        putenv('SSH_PUBLIC_KEY=' . file_get_contents('/root/.ssh/id_rsa.pub'));
+    }
+
     protected function setUp(): void
     {
         parent::setUp();
