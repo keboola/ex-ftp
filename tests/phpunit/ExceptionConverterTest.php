@@ -145,14 +145,14 @@ class ExceptionConverterTest extends TestCase
 
     public function downloadExceptionMessageProvider(): array
     {
-        $filePtah = '/foo/bar.jpg';
+        $filePath = '/foo/bar.jpg';
         $progressMessage = 'Operation now in progress (115)';
 
         return [
             [
                 UserException::class,
-                sprintf('Error while trying to download file: File not found at path: %s', $filePtah),
-                new FileNotFoundException($filePtah),
+                sprintf('Error while trying to download file: File not found at path: %s', $filePath),
+                new FileNotFoundException($filePath),
             ],
             [
                 UserException::class,
@@ -172,6 +172,16 @@ class ExceptionConverterTest extends TestCase
                 ApplicationException::class,
                 'Foo Bar',
                 new \RuntimeException('Foo Bar'),
+            ],
+            [
+                UserException::class,
+                'Connection timed out. Check your timeout configuration, server health and try again.',
+                new \ErrorException('ftp_rawlist(): Connection timed out'),
+            ],
+            [
+                UserException::class,
+                'Connection timed out. Check your timeout configuration, server health and try again.',
+                new \ErrorException('ftp_mdtm(): Connection timed out'),
             ],
         ];
     }
