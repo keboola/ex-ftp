@@ -1,0 +1,21 @@
+{
+  "parameters": {
+    "host": "ftp",
+    "username": "ftpuser",
+    "#password": "userpass",
+    "port": 21,
+    "ssh": {
+      "enabled": true,
+      "keys": {
+        "#private": "%env(string:SSH_PRIVATE_KEY)%",
+        "public": "%env(string:SSH_PUBLIC_KEY)%"
+      },
+      "user": "root",
+      "sshHost": "bad-sshproxy",
+      "passivePortRange": "10000:10005"
+    },
+    "path": "*",
+    "connectionType" : "FTP",
+    "ignorePassiveAddress": true
+  }
+}
