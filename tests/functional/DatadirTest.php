@@ -34,7 +34,7 @@ class DatadirTest extends AbstractDatadirTestCase
             $timestamps[$file->getRelativePathname()] = $file->getMTime();
         }
 
-        // --- normal-donwload test ----
+        // --- normal-download test ----
         $state = [
             "ex_ftp_state" => [
                 "newest_timestamp" => 0,
