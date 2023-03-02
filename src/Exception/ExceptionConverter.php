@@ -57,6 +57,15 @@ final class ExceptionConverter
             ));
         }
 
+        // Make the message clear for user (ftp_rawlist()/ftp_mdtm(): Connection timed out)
+        if ($e instanceof \ErrorException
+            && preg_match_all('/Connection timed out/', $e->getMessage())) {
+            self::toUserException(
+                $e,
+                'Connection timed out. Check your timeout configuration, server health and try again.',
+            );
+        }
+
         // Catch user_error from phpseclib
         // phpcs:disable
         if (preg_match_all('/(getaddrinfo failed)|(Cannot connect to)|(The authenticity of)|(Connection closed prematurely)/', $e->getMessage())) {

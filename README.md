@@ -1,14 +1,8 @@
 # FTP extractor
-
-[![Build Status](https://travis-ci.com/keboola/ex-ftp.svg?branch=master)](https://travis-ci.com/keboola/ex-ftp)
-[![Maintainability](https://api.codeclimate.com/v1/badges/633ff7508d0e316269da/maintainability)](https://codeclimate.com/github/keboola/ex-ftp/maintainability)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/keboola/ex-ftp/blob/master/LICENSE.md)
-
 Download file(s) from FTP (optional TLS) or SFTP server. Supports glob syntax.
+
 # Configuration
-
 ## Options
-
 The configuration requires following properties: 
 
 - `host` - string (required): IP address or Hostname of FTP(s)/SFTP server

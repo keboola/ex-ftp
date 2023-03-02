@@ -5,6 +5,7 @@ services:
     image: keboola/ex-ftp
     volumes:
       - ./tests/ftpInitContent:/code/tests/ftpInitContent
+      - ssh-keys:/root/.ssh:ro
     links:
       - sshproxy
       - ftp
@@ -20,7 +21,7 @@ services:
       - ftp
 
   ftp:
-    image: stilliard/pure-ftpd
+    image: rreignier/pure-ftpd
     environment:
       FTP_USER_NAME: ftpuser
       FTP_USER_PASS: userpass
