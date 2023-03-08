@@ -66,6 +66,16 @@ final class ExceptionConverter
             );
         }
 
+        // Make the message clear for user (ftp_rawlist\(\): data_accept: SSL/TLS handshake failed)
+        if ($e instanceof \ErrorException
+            && preg_match_all('/ftp_rawlist\(\): data_accept: SSL\/TLS handshake failed/', $e->getMessage())) {
+            self::toUserException(
+                $e,
+                'SSL/TLS handshake failed. Check your credentials, SSL/TLS configuration and make sure the ' .
+                'certificate is valid and is not expired.',
+            );
+        }
+
         // Catch user_error from phpseclib
         // phpcs:disable
         if (preg_match_all('/(getaddrinfo failed)|(Cannot connect to)|(The authenticity of)|(Connection closed prematurely)/', $e->getMessage())) {

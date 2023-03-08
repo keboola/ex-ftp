@@ -183,6 +183,12 @@ class ExceptionConverterTest extends TestCase
                 'Connection timed out. Check your timeout configuration, server health and try again.',
                 new \ErrorException('ftp_mdtm(): Connection timed out'),
             ],
+            [
+                UserException::class,
+                'SSL/TLS handshake failed. Check your credentials, SSL/TLS configuration and make sure the ' .
+                'certificate is valid and is not expired.',
+                new \ErrorException('ftp_rawlist(): data_accept: SSL/TLS handshake failed'),
+            ],
         ];
     }
 }
