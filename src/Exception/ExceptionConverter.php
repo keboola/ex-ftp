@@ -76,6 +76,14 @@ final class ExceptionConverter
             );
         }
 
+        if ($e instanceof \ErrorException
+            && preg_match_all('/Expected SSH_FXP_ATTRS or SSH_FXP_STATUS/', $e->getMessage())) {
+            self::toUserException(
+                $e,
+                'Expected SSH_FXP_ATTRS or SSH_FXP_STATUS',
+            );
+        }
+
         // Catch user_error from phpseclib
         // phpcs:disable
         if (preg_match_all('/(getaddrinfo failed)|(Cannot connect to)|(The authenticity of)|(Connection closed prematurely)/', $e->getMessage())) {
