@@ -78,10 +78,7 @@ final class ExceptionConverter
 
         if ($e instanceof \ErrorException
             && preg_match_all('/Expected SSH_FXP_ATTRS or SSH_FXP_STATUS/', $e->getMessage())) {
-            self::toUserException(
-                $e,
-                'Expected SSH_FXP_ATTRS or SSH_FXP_STATUS',
-            );
+            self::toUserException($e);
         }
 
         // Catch user_error from phpseclib
