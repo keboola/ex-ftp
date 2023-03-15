@@ -189,6 +189,11 @@ class ExceptionConverterTest extends TestCase
                 'certificate is valid and is not expired.',
                 new \ErrorException('ftp_rawlist(): data_accept: SSL/TLS handshake failed'),
             ],
+            [
+                UserException::class,
+                'Expected SSH_FXP_ATTRS or SSH_FXP_STATUS',
+                new \ErrorException('Expected SSH_FXP_ATTRS or SSH_FXP_STATUS'),
+            ],
         ];
     }
 }
