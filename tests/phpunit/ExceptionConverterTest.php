@@ -194,6 +194,11 @@ class ExceptionConverterTest extends TestCase
                 'Expected SSH_FXP_ATTRS or SSH_FXP_STATUS',
                 new \ErrorException('Expected SSH_FXP_ATTRS or SSH_FXP_STATUS'),
             ],
+            [
+                UserException::class,
+                'Expected SSH_FXP_VERSION',
+                new \ErrorException('Expected SSH_FXP_VERSION'),
+            ],
         ];
     }
 }

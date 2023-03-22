@@ -77,7 +77,7 @@ final class ExceptionConverter
         }
 
         if ($e instanceof \ErrorException
-            && preg_match_all('/Expected SSH_FXP_ATTRS or SSH_FXP_STATUS/', $e->getMessage())) {
+            && preg_match_all('/Expected SSH_/', $e->getMessage())) {
             self::toUserException($e);
         }
 
