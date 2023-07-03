@@ -39,6 +39,10 @@ final class ExceptionConverter
             throw $e;
         }
 
+        if ($e instanceof ApplicationException) {
+            throw $e;
+        }
+
         if ($e instanceof SftpAdapterException) {
             self::toUserException($e);
         }
