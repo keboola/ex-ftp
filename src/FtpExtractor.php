@@ -207,8 +207,8 @@ class FtpExtractor
                 }
                 $this->fs->dumpFile($localPath, $stream);
                 if ($ftpSize) {
-                    $localSize = filesize($localPath);
-                    $this->checkFileSize($localPath, $ftpPath, $localSize, $ftpSize);
+                    $localSize = (int) filesize($localPath);
+                    $this->checkFileSize($ftpPath, $localSize, $ftpSize);
                 }
             });
         } catch (\Throwable $e) {
@@ -241,28 +241,9 @@ class FtpExtractor
         $this->logger->warning(sprintf('Cannot get size of the FTP file "%s".', $ftpPath));
         return 0;
     }
-
-    /**
-     * @param string $localPath
-     * @param string $ftpPath
-     * @param int|false $localSize
-     * @param int|false $ftpSize
-     * @throws ApplicationException
-     */
-    private function checkFileSize(string $localPath, string $ftpPath, $localSize, $ftpSize): void
+    
+    private function checkFileSize(string $ftpPath, int $localSize, int $ftpSize): void
     {
-        if (!is_int($localSize)) {
-            throw new ApplicationException(
-                sprintf('Cannot get size of the local file "%s".', $localPath)
-            );
-        }
-
-        if (!is_int($ftpSize)) {
-            throw new ApplicationException(
-                sprintf('Cannot get size of the FTP file "%s".', $ftpPath)
-            );
-        }
-
         if ($ftpSize !== $localSize) {
             throw new UserException(sprintf(
                 'The size of the downloaded file "%s" does not match the size reported from the FTP server. ' .
