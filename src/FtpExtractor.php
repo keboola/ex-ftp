@@ -200,15 +200,15 @@ class FtpExtractor
 
         try {
             $this->createRetryProxy()->call(function () use ($localPath, $ftpPath): void {
-                $ftpSize = $this->getFileSize($ftpPath);
+                $ftpSize = $this->getFtpFileSize($ftpPath);
                 $stream = $this->ftpFilesystem->readStream($ftpPath);
                 if ($stream === false) {
                     throw new UserException(sprintf('Downloading of file "%s" failed.', $ftpPath));
                 }
                 $this->fs->dumpFile($localPath, $stream);
                 if ($ftpSize) {
-                    $localSize = filesize($localPath);
-                    $this->checkFileSize($localPath, $ftpPath, $localSize, $ftpSize);
+                    $localSize = self::getLocalFileSize($localPath);
+                    $this->checkFileSize($ftpPath, $localSize, $ftpSize);
                 }
             });
         } catch (\Throwable $e) {
@@ -226,7 +226,7 @@ class FtpExtractor
         );
     }
 
-    private function getFileSize(string $ftpPath): int
+    private function getFtpFileSize(string $ftpPath): int
     {
         try {
             $ftpSize = $this->ftpFilesystem->getSize($ftpPath);
@@ -242,27 +242,8 @@ class FtpExtractor
         return 0;
     }
 
-    /**
-     * @param string $localPath
-     * @param string $ftpPath
-     * @param int|false $localSize
-     * @param int|false $ftpSize
-     * @throws ApplicationException
-     */
-    private function checkFileSize(string $localPath, string $ftpPath, $localSize, $ftpSize): void
+    private function checkFileSize(string $ftpPath, int $localSize, int $ftpSize): void
     {
-        if (!is_int($localSize)) {
-            throw new ApplicationException(
-                sprintf('Cannot get size of the local file "%s".', $localPath)
-            );
-        }
-
-        if (!is_int($ftpSize)) {
-            throw new ApplicationException(
-                sprintf('Cannot get size of the FTP file "%s".', $ftpPath)
-            );
-        }
-
         if ($ftpSize !== $localSize) {
             throw new UserException(sprintf(
                 'The size of the downloaded file "%s" does not match the size reported from the FTP server. ' .
@@ -272,6 +253,37 @@ class FtpExtractor
                 self::humanReadableFileSize($localSize)
             ));
         }
+    }
+
+    /**
+     * Get size of a local file even if it is larger than 2GB.
+     * Original PHP filesize function has 2GB limit, see: https://www.php.net/manual/en/function.filesize.php
+     * Inspired by: https://stackoverflow.com/a/54592081
+     */
+    private static function getLocalFileSize(string $path): int
+    {
+        $fp = @fopen($path, "r");
+        if ($fp === false) {
+            $error = error_get_last();
+            throw new ApplicationException(
+                sprintf('Cannot get size of the local file "%s". %s', $path, $error['message'] ?? "n/a")
+            );
+        }
+        
+        try {
+            fseek($fp, 0, SEEK_END);
+            $filesize = @ftell($fp);
+            if ($filesize === false) {
+                $error = error_get_last();
+                throw new ApplicationException(
+                    sprintf('Cannot get size of the local file "%s". %s', $path, $error['message'] ?? "n/a")
+                );
+            }
+        } finally {
+            fclose($fp);
+        }
+
+        return (int) $filesize;
     }
 
     private static function humanReadableFileSize(int $size, int $precision = 2): string
