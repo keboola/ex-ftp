@@ -143,7 +143,9 @@ class FtpExtractor
         $items = [];
         try {
             if (Glob::getStaticPrefix($absSourcePath) === $absSourcePath) { //means is file
-                $file = $this->ftpFilesystem->get($absSourcePath);
+                $file = $this->createRetryProxy()->call(function () use ($absSourcePath) {
+                    return $this->ftpFilesystem->get($absSourcePath);
+                });
                 $items[] = [
                     'path' => $file->getPath(),
                     'type' => ($file->isFile()) ? ItemFilter::FTP_FILETYPE_FILE : '',
@@ -151,7 +153,9 @@ class FtpExtractor
             } else { //means is glob based path
                 $this->logger->info("Fetching list of files in base path");
                 $basePath = Glob::getBasePath($absSourcePath);
-                $items = $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
+                $items = $this->createRetryProxy()->call(function () use ($basePath): array {
+                    return $this->ftpFilesystem->listContents($basePath, self::RECURSIVE_COPY);
+                });
             }
             $countBeforeFilter = count($items);
             $this->logger->info(
