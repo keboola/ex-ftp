@@ -37,7 +37,8 @@ class FtpExtractorComponent extends BaseComponent
             $config->isOnlyForNewFiles(),
             $ftpFs,
             $registry,
-            $this->getLogger()
+            $this->getLogger(),
+            $this->getConfig()->skipFileNotFound()
         );
         $count = $ftpExtractor->copyFiles(
             $config->getPathToCopy(),
