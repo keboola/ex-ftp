@@ -103,6 +103,7 @@ class ConfigTest extends TestCase
                 'timeout' => 60,
                 'listing' => 'recursion',
                 'ignorePassiveAddress' => false,
+                'skipFileNotFound' => false,
                 'ssh' => $sshConfig,
             ],
         ];

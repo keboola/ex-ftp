@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
-use http\Header\Parser;
 use Keboola\Component\UserException;
 use Keboola\FtpExtractor\Exception\ApplicationException;
 use Keboola\FtpExtractor\Exception\ExceptionConverter;
@@ -30,41 +29,26 @@ class FtpExtractor
     private const CONNECTION_RETRIES = 3;
     private const RETRY_BACKOFF = 300;
 
-    /**
-     * @var FtpFilesystem
-     */
-    private $ftpFilesystem;
+    private FtpFilesystem $ftpFilesystem;
 
-    /**
-     * @var bool
-     */
-    private $onlyNewFiles;
+    private bool $onlyNewFiles;
 
-    /**
-     * @var array
-     */
-    private $filesToDownload;
+    private array $filesToDownload;
 
-    /**
-     * @var FileStateRegistry
-     */
-    private $registry;
+    private FileStateRegistry $registry;
 
-    /**
-     * @var LoggerInterface
-     */
-    private $logger;
+    private LoggerInterface $logger;
 
-    /**
-     * @var Filesystem
-     */
-    private $fs;
+    private Filesystem $fs;
+
+    private bool $skipFileNotFound;
 
     public function __construct(
-        bool              $onlyNewFiles,
-        FtpFilesystem     $ftpFs,
+        bool $onlyNewFiles,
+        FtpFilesystem $ftpFs,
         FileStateRegistry $registry,
-        LoggerInterface   $logger
+        LoggerInterface $logger,
+        bool $skipFileNotFound = false
     ) {
         $this->ftpFilesystem = $ftpFs;
         $this->onlyNewFiles = $onlyNewFiles;
@@ -72,6 +56,7 @@ class FtpExtractor
         $this->registry = $registry;
         $this->logger = $logger;
         $this->fs = new Filesystem();
+        $this->skipFileNotFound = $skipFileNotFound;
     }
 
     public function copyFiles(string $sourcePath, string $destinationPath): int
@@ -125,8 +110,12 @@ class FtpExtractor
                         continue;
                     }
                 } catch (FileNotFoundException $e) {
-                    $this->logger->warning(sprintf('File "%s" not found on FTP server.', $item['path']));
-                    continue;
+                    if ($this->skipFileNotFound) {
+                        $this->logger->warning(sprintf('File "%s" not found on FTP server.', $item['path']));
+                        continue;
+                    } else {
+                        ExceptionConverter::handlePrepareToDownloadException($e);
+                    }
                 } catch (Throwable $e) {
                     ExceptionConverter::handlePrepareToDownloadException($e);
                 }
@@ -221,8 +210,12 @@ class FtpExtractor
                 }
             });
         } catch (FileNotFoundException $e) {
-            $this->logger->warning(sprintf('File "%s" not found on FTP server.', $ftpPath));
-            return;
+            if ($this->skipFileNotFound) {
+                $this->logger->warning(sprintf('File "%s" not found on FTP server.', $ftpPath));
+                return;
+            } else {
+                ExceptionConverter::handleDownloadException($e);
+            }
         } catch (Throwable $e) {
             ExceptionConverter::handleDownloadException($e);
         }

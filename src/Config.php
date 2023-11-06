@@ -42,6 +42,11 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', 'onlyNewFiles']);
     }
 
+    public function skipFileNotFound(): bool
+    {
+        return $this->getValue(['parameters', 'skipFileNotFound']);
+    }
+
     public function getPrivateKey(): string
     {
         return $this->getValue(['parameters', '#privateKey']);
