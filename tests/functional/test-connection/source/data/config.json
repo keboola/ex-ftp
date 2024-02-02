@@ -1,7 +1,7 @@
 {
     "action": "testConnection",
     "parameters": {
-        "host": "ftp-bad",
+        "host": "ftp",
         "username": "ftpuser",
         "#password": "userpass",
         "port": 21,
