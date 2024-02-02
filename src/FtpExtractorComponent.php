@@ -50,10 +50,9 @@ class FtpExtractorComponent extends BaseComponent
             $config = $this->openSshTunnel($config);
         }
 
-        /** @var Ftp|SftpAdapter $adapter */
-        $adapter = AdapterFactory::getAdapter($config);
-
         try {
+            /** @var Ftp|SftpAdapter $adapter */
+            $adapter = AdapterFactory::getAdapter($config);
             $adapter->connect();
         } catch (Throwable $e) {
             throw new UserException(sprintf("Connection failed: '%s'", $e->getMessage()), 0, $e);
