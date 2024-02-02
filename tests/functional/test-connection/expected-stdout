@@ -1,0 +1,3 @@
+Connecting to host "ftp-bad" on port "21".
+Could not connect to host: ftp-bad, port:21. Retrying... [1x]
+Could not connect to host: ftp-bad, port:21. Retrying... [2x]
