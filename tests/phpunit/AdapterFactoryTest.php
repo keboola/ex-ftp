@@ -11,6 +11,7 @@ use Keboola\FtpExtractor\ConfigDefinition;
 use League\Flysystem\Adapter\Ftp;
 use League\Flysystem\Sftp\SftpAdapter;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 class AdapterFactoryTest extends TestCase
@@ -23,7 +24,7 @@ class AdapterFactoryTest extends TestCase
     {
         $this->assertInstanceOf(
             $expectedClass,
-            AdapterFactory::getAdapter($config)
+            AdapterFactory::getAdapter($config, new NullLogger())
         );
     }
 
@@ -60,7 +61,7 @@ class AdapterFactoryTest extends TestCase
         );
         $this->expectException(UserException::class);
         $this->expectExceptionMessageMatches('/Could not login/');
-        AdapterFactory::getAdapter($config);
+        AdapterFactory::getAdapter($config, new NullLogger());
     }
 
     private function provideTestConfig(string $connectionType): Config
