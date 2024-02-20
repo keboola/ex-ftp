@@ -8,10 +8,14 @@ use Keboola\Component\UserException;
 use League\Flysystem\Adapter\AbstractAdapter;
 use League\Flysystem\Adapter\Ftp;
 use League\Flysystem\Sftp\SftpAdapter;
+use Psr\Log\LoggerInterface;
+use Retry\BackOff\ExponentialBackOffPolicy;
+use Retry\Policy\SimpleRetryPolicy;
+use Retry\RetryProxy;
 
 class AdapterFactory
 {
-    public static function getAdapter(Config $config): AbstractAdapter
+    public static function getAdapter(Config $config, LoggerInterface $logger): AbstractAdapter
     {
         switch ($config->getConnectionType()) {
             case ConfigDefinition::CONNECTION_TYPE_FTP:
@@ -19,7 +23,7 @@ class AdapterFactory
             case ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT:
                 return static::createSslFtpImplicitAdapter($config);
             case ConfigDefinition::CONNECTION_TYPE_SFTP:
-                return static::createSftpAdapter($config);
+                return static::createSftpAdapter($config, $logger);
             default:
                 throw new \InvalidArgumentException("Specified adapter not found");
         }
@@ -39,7 +43,7 @@ class AdapterFactory
         );
     }
 
-    private static function createSftpAdapter(Config $config): AbstractAdapter
+    private static function createSftpAdapter(Config $config, LoggerInterface $logger): AbstractAdapter
     {
         if ($config->getPrivateKey() === '') {
             $adapter = new SftpAdapter($config->getConnectionConfig());
@@ -48,18 +52,27 @@ class AdapterFactory
                 array_merge($config->getConnectionConfig(), ['privateKey' => $config->getPrivateKey()])
             );
         }
-        static::setSftpRoot($adapter, $config->getPathToCopy());
+        static::setSftpRoot($adapter, $config->getPathToCopy(), $logger);
         return $adapter;
     }
 
-    private static function setSftpRoot(SftpAdapter $adapter, string $sourcePath): void
+    private static function setSftpRoot(SftpAdapter $adapter, string $sourcePath, LoggerInterface $logger): void
     {
         if (substr($sourcePath, 0, 1) === '/') {
             $adapter->setRoot('/');
             return;
         }
+
+        $retryProxy = new RetryProxy(
+            new SimpleRetryPolicy(FtpExtractor::CONNECTION_RETRIES),
+            new ExponentialBackOffPolicy(FtpExtractor::RETRY_BACKOFF),
+            $logger
+        );
+
         try {
-            $pwd = $adapter->getConnection()->pwd();
+            $pwd = $retryProxy->call(function () use ($adapter): string {
+                return $adapter->getConnection()->pwd();
+            });
             $adapter->setRoot($pwd);
         } catch (\RuntimeException $e) {
             throw new UserException($e->getMessage(), $e->getCode(), $e);

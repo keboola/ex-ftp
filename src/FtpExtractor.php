@@ -26,8 +26,8 @@ class FtpExtractor
     private const FILE_TIMESTAMP_KEY = 'timestamp';
     private const FILE_SOURCE_KEY = 'source-path';
     private const LOGGER_INFO_LOOP = '10';
-    private const CONNECTION_RETRIES = 3;
-    private const RETRY_BACKOFF = 300;
+    public const CONNECTION_RETRIES = 3;
+    public const RETRY_BACKOFF = 300;
 
     private FtpFilesystem $ftpFilesystem;
 

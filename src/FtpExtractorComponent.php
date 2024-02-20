@@ -22,7 +22,7 @@ class FtpExtractorComponent extends BaseComponent
             $config = $this->openSshTunnel($config);
         }
         $registry = new FileStateRegistry($this->getInputState());
-        $ftpFs = new Filesystem(AdapterFactory::getAdapter($config));
+        $ftpFs = new Filesystem(AdapterFactory::getAdapter($config, $this->getLogger()));
         $ftpExtractor = new FtpExtractor(
             $config->isOnlyForNewFiles(),
             $ftpFs,
@@ -52,7 +52,7 @@ class FtpExtractorComponent extends BaseComponent
 
         try {
             /** @var Ftp|SftpAdapter $adapter */
-            $adapter = AdapterFactory::getAdapter($config);
+            $adapter = AdapterFactory::getAdapter($config, $this->getLogger());
             $adapter->connect();
         } catch (Throwable $e) {
             throw new UserException(sprintf("Connection failed: '%s'", $e->getMessage()), 0, $e);
