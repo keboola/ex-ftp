@@ -22,14 +22,14 @@ class ExceptionConverterTest extends TestCase
     public function testHandleCopyFilesException(
         string $expectedException,
         string $expectedExceptionMessage,
-        \Throwable $throwException
+        Throwable $throwException,
     ): void {
         $this->expectException($expectedException);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
             throw $throwException;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             ExceptionConverter::handleCopyFilesException($e);
         }
     }
@@ -41,14 +41,14 @@ class ExceptionConverterTest extends TestCase
     public function testHandlePrepareToDownloadException(
         string $expectedException,
         string $expectedExceptionMessage,
-        \Throwable $throwException
+        Throwable $throwException,
     ): void {
         $this->expectException($expectedException);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
             throw $throwException;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             ExceptionConverter::handlePrepareToDownloadException($e);
         }
     }
@@ -60,14 +60,14 @@ class ExceptionConverterTest extends TestCase
     public function testHandleDownloadException(
         string $expectedException,
         string $expectedExceptionMessage,
-        \Throwable $throwException
+        Throwable $throwException,
     ): void {
         $this->expectException($expectedException);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
             throw $throwException;
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             ExceptionConverter::handleDownloadException($e);
         }
     }
@@ -98,8 +98,8 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 'php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known',
-                new \RuntimeException(
-                    'php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known'
+                new RuntimeException(
+                    'php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known',
                 ),
             ],
             [
@@ -110,12 +110,12 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 'The authenticity of host foo can\'t be established.',
-                new \RuntimeException('The authenticity of host foo can\'t be established.'),
+                new RuntimeException('The authenticity of host foo can\'t be established.'),
             ],
             [
                 UserException::class,
                 'Cannot connect to foo bar',
-                new \RuntimeException('Cannot connect to foo bar'),
+                new RuntimeException('Cannot connect to foo bar'),
             ],
             [
                 UserException::class,
@@ -130,15 +130,15 @@ class ExceptionConverterTest extends TestCase
             [
                 ApplicationException::class,
                 'Foo bar',
-                new \RuntimeException('Foo bar'),
+                new RuntimeException('Foo bar'),
             ],
             [
                 UserException::class,
                 sprintf(
                     'Connection was terminated. Check that the connection is not blocked by Firewall ' .
-                    'or set ignore passive address: Operation now in progress (115)'
+                    'or set ignore passive address: Operation now in progress (115)',
                 ),
-                new \ErrorException('Operation now in progress (115)'),
+                new ErrorException('Operation now in progress (115)'),
             ],
         ];
     }
@@ -159,45 +159,45 @@ class ExceptionConverterTest extends TestCase
                 sprintf(
                     'Connection was terminated. Check that the connection is not blocked by Firewall ' .
                     'or set ignore passive address: %s',
-                    $progressMessage
+                    $progressMessage,
                 ),
-                new \ErrorException($progressMessage),
+                new ErrorException($progressMessage),
             ],
             [
                 ApplicationException::class,
                 'Foo Bar',
-                new \ErrorException('Foo Bar'),
+                new ErrorException('Foo Bar'),
             ],
             [
                 ApplicationException::class,
                 'Foo Bar',
-                new \RuntimeException('Foo Bar'),
+                new RuntimeException('Foo Bar'),
             ],
             [
                 UserException::class,
                 'Connection timed out. Check your timeout configuration, server health and try again.',
-                new \ErrorException('ftp_rawlist(): Connection timed out'),
+                new ErrorException('ftp_rawlist(): Connection timed out'),
             ],
             [
                 UserException::class,
                 'Connection timed out. Check your timeout configuration, server health and try again.',
-                new \ErrorException('ftp_mdtm(): Connection timed out'),
+                new ErrorException('ftp_mdtm(): Connection timed out'),
             ],
             [
                 UserException::class,
                 'SSL/TLS handshake failed. Check your credentials, SSL/TLS configuration and make sure the ' .
                 'certificate is valid and is not expired.',
-                new \ErrorException('ftp_rawlist(): data_accept: SSL/TLS handshake failed'),
+                new ErrorException('ftp_rawlist(): data_accept: SSL/TLS handshake failed'),
             ],
             [
                 UserException::class,
                 'Expected SSH_FXP_ATTRS or SSH_FXP_STATUS',
-                new \ErrorException('Expected SSH_FXP_ATTRS or SSH_FXP_STATUS'),
+                new ErrorException('Expected SSH_FXP_ATTRS or SSH_FXP_STATUS'),
             ],
             [
                 UserException::class,
                 'Expected SSH_FXP_VERSION',
-                new \ErrorException('Expected SSH_FXP_VERSION'),
+                new ErrorException('Expected SSH_FXP_VERSION'),
             ],
         ];
     }

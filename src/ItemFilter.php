@@ -6,7 +6,7 @@ namespace Keboola\FtpExtractor;
 
 class ItemFilter
 {
-    public const FTP_FILETYPE_FILE = 'file';
+    public const string FTP_FILETYPE_FILE = 'file';
 
     public static function getOnlyFiles(array $items): array
     {

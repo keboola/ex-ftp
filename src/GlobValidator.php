@@ -20,7 +20,7 @@ class GlobValidator
 
     public static function convertToAbsolute(string $path): string
     {
-        if (substr($path, 0, 1) !== '/') {
+        if (!str_starts_with($path, '/')) {
             return '/' . $path;
         }
 
