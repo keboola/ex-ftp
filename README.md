@@ -156,22 +156,22 @@ Clone this repository and init the workspace with following command:
 ```
 git clone https://github.com/keboola/ex-ftp
 cd ex-ftp
-docker-compose build
-docker-compose run --rm dev composer install --no-scripts
+docker compose build
+docker compose run --rm dev composer install --no-scripts
 ```
 
 Build the image:
 ```
-docker-compose build dev
+docker compose build dev
 ```
 
 ## Tools
 
-- Tests: `docker-compose run --rm dev composer tests`
-  - Unit tests: `docker-compose run --rm dev composer tests-phpunit`
-  - Datadir tests: `docker-compose run --rm dev composer tests-datadir`
-- Code sniffer: `docker-compose run --rm dev composer phpcs`
-- Static analysis: `docker-compose run --rm dev composer phpstan`
+- Tests: `docker compose run --rm dev composer tests`
+  - Unit tests: `docker compose run --rm dev composer tests-phpunit`
+  - Datadir tests: `docker compose run --rm dev composer tests-datadir`
+- Code sniffer: `docker compose run --rm dev composer phpcs`
+- Static analysis: `docker compose run --rm dev composer phpstan`
 
 ## New functional test
 
