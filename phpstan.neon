@@ -1,4 +1,5 @@
 parameters:
-    checkMissingIterableValueType: false
     ignoreErrors:
+        - identifier: missingType.iterableValue
         - '#Cannot call method .* on Symfony\\Component\\Config\\Definition\\Builder\\NodeParentInterface\|null#'
+
