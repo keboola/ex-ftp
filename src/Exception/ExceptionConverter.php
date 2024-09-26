@@ -4,61 +4,73 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor\Exception;
 
+use ErrorException;
+use InvalidArgumentException;
 use Keboola\Component\UserException;
-use League\Flysystem\FileNotFoundException;
 use League\Flysystem\FilesystemException;
-use League\Flysystem\Sftp\SftpAdapterException;
+use League\Flysystem\Ftp\UnableToAuthenticate;
+use League\Flysystem\UnableToReadFile;
+use phpseclib3\Exception\ConnectionClosedException;
+use Throwable;
 
 final class ExceptionConverter
 {
-    public static function handleCopyFilesException(\Throwable $e): void
+    public static function handleCopyFilesException(Throwable $e): void
     {
         self::handleCommonException($e);
     }
 
-    public static function handlePrepareToDownloadException(\Throwable $e): void
+    public static function handlePrepareToDownloadException(Throwable $e): void
     {
         self::handleCommonException($e);
     }
 
-    public static function handleDownloadException(\Throwable $e): void
+    public static function handleDownloadException(Throwable $e): void
     {
-        if ($e instanceof FileNotFoundException) {
+        if ($e instanceof UnableToReadFile) {
             self::toUserException($e, sprintf(
                 'Error while trying to download file: %s',
-                $e->getMessage()
+                $e->getMessage(),
             ));
         }
 
         self::handleCommonException($e);
     }
 
-    private static function handleCommonException(\Throwable $e): void
+    private static function handleCommonException(Throwable $e): void
     {
         if ($e instanceof UserException) {
             throw $e;
-        }
-
-        if ($e instanceof SftpAdapterException) {
-            self::toUserException($e);
         }
 
         if ($e instanceof FilesystemException) {
             self::toUserException($e);
         }
 
+        if ($e instanceof UnableToAuthenticate) {
+            self::toUserException($e);
+        }
+
+        if ($e instanceof ConnectionClosedException) {
+            self::toUserException($e);
+        }
+
+        if ($e instanceof InvalidArgumentException) {
+            self::toUserException($e);
+        }
+
         // Make the message clear for user (ftp_rawlist(): php_connect_nonb() failed: Operation now in progress)
-        if ($e instanceof \ErrorException
+        if ($e instanceof ErrorException
             && preg_match_all('/Operation now in progress \(115\)/', $e->getMessage())) {
             self::toUserException($e, sprintf(
                 'Connection was terminated. Check that the connection is not blocked by Firewall ' .
                 'or set ignore passive address: %s',
-                $e->getMessage()
+                $e->getMessage(),
             ));
         }
 
         // Make the message clear for user (ftp_rawlist()/ftp_mdtm(): Connection timed out)
-        if ($e instanceof \ErrorException
+        if ($e instanceof ErrorException
             && preg_match_all('/Connection timed out/', $e->getMessage())) {
             self::toUserException(
                 $e,
@@ -67,7 +79,7 @@ final class ExceptionConverter
         }
 
         // Make the message clear for user (ftp_rawlist\(\): data_accept: SSL/TLS handshake failed)
-        if ($e instanceof \ErrorException
+        if ($e instanceof ErrorException
             && preg_match_all('/ftp_rawlist\(\): data_accept: SSL\/TLS handshake failed/', $e->getMessage())) {
             self::toUserException(
                 $e,
@@ -76,7 +88,7 @@ final class ExceptionConverter
             );
         }
 
-        if ($e instanceof \ErrorException
+        if ($e instanceof ErrorException
             && preg_match_all('/Expected SSH_/', $e->getMessage())) {
             self::toUserException($e);
         }
@@ -91,12 +103,12 @@ final class ExceptionConverter
         self::toApplicationException($e);
     }
 
-    private static function toUserException(\Throwable $e, ?string $customMessage = null): void
+    private static function toUserException(Throwable $e, ?string $customMessage = null): void
     {
         throw new UserException($customMessage ?: $e->getMessage(), $e->getCode(), $e);
     }
 
-    private static function toApplicationException(\Throwable $e): void
+    private static function toApplicationException(Throwable $e): void
     {
         throw new ApplicationException($e->getMessage(), $e->getCode(), $e);
     }

@@ -6,43 +6,62 @@ namespace Keboola\FtpExtractor;
 
 use Keboola\Component\BaseComponent;
 use Keboola\Component\UserException;
+use Keboola\FtpExtractor\Exception\ExceptionConverter;
 use Keboola\SSHTunnel\SSH;
 use Keboola\SSHTunnel\SSHException;
-use League\Flysystem\Adapter\Ftp;
 use League\Flysystem\Filesystem;
-use League\Flysystem\Sftp\SftpAdapter;
 use Throwable;
 
 class FtpExtractorComponent extends BaseComponent
 {
+    /**
+     * @throws UserException
+     */
     protected function run(): void
     {
         $config = $this->getConfig();
         if ($config->isSshEnabled()) {
             $config = $this->openSshTunnel($config);
         }
+
+        try {
+            $this->getLogger()->info(sprintf(
+                'Connecting to host "%s" on port "%s".',
+                $config->getHost(),
+                $config->getPort(),
+            ));
+            AdapterFactory::checkConnectivity($config);
+
+            $this->getLogger()->info('Connection successful');
+        } catch (Throwable $e) {
+            ExceptionConverter::handleCopyFilesException($e);
+        }
+
         $registry = new FileStateRegistry($this->getInputState());
-        $ftpFs = new Filesystem(AdapterFactory::getAdapter($config, $this->getLogger()));
+        $ftpFs = new Filesystem(AdapterFactory::getAdapter($config));
         $ftpExtractor = new FtpExtractor(
             $config->isOnlyForNewFiles(),
             $ftpFs,
             $registry,
             $this->getLogger(),
-            $this->getConfig()->skipFileNotFound()
+            $this->getConfig()->skipFileNotFound(),
         );
         $count = $ftpExtractor->copyFiles(
             $config->getPathToCopy(),
-            $this->getOutputDirectory()
+            $this->getOutputDirectory(),
         );
         $this->writeOutputStateToFile(
             array_merge(
                 $this->getInputState(),
-                [FileStateRegistry::STATE_FILE_KEY => $registry->getFileStates()]
-            )
+                [FileStateRegistry::STATE_FILE_KEY => $registry->getFileStates()],
+            ),
         );
-        $this->getLogger()->info(sprintf("%d file(s) downloaded", $count));
+        $this->getLogger()->info(sprintf('%d file(s) downloaded', $count));
     }
 
+    /**
+     * @throws UserException
+     */
     public function testConnectionAction(): array
     {
         $config = $this->getConfig();
@@ -51,9 +70,7 @@ class FtpExtractorComponent extends BaseComponent
         }
 
         try {
-            /** @var Ftp|SftpAdapter $adapter */
-            $adapter = AdapterFactory::getAdapter($config, $this->getLogger());
-            $adapter->connect();
+            AdapterFactory::checkConnectivity($config);
         } catch (Throwable $e) {
             throw new UserException(sprintf("Connection failed: '%s'", $e->getMessage()), 0, $e);
         }
@@ -92,6 +109,9 @@ class FtpExtractorComponent extends BaseComponent
         return ConfigDefinition::class;
     }
 
+    /**
+     * @throws UserException
+     */
     private function openSshTunnel(Config $config): Config
     {
         try {

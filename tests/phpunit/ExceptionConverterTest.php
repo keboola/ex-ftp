@@ -4,14 +4,19 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor\Tests;
 
-use Keboola\FtpExtractor\Exception\ApplicationException;
-use League\Flysystem\ConnectionRuntimeException;
-use League\Flysystem\Sftp\ConnectionErrorException;
-use League\Flysystem\Sftp\InvalidRootException;
-use PHPUnit\Framework\TestCase;
-use Keboola\FtpExtractor\Exception\ExceptionConverter;
-use League\Flysystem\FileNotFoundException;
+use ErrorException;
+use InvalidArgumentException;
 use Keboola\Component\UserException;
+use Keboola\FtpExtractor\Exception\ApplicationException;
+use Keboola\FtpExtractor\Exception\ExceptionConverter;
+use League\Flysystem\FilesystemException;
+use League\Flysystem\Ftp\FtpConnectionException;
+use League\Flysystem\Ftp\UnableToAuthenticate;
+use League\Flysystem\UnableToReadFile;
+use phpseclib3\Exception\ConnectionClosedException;
+use PHPUnit\Framework\TestCase;
+use RuntimeException;
+use Throwable;
 
 class ExceptionConverterTest extends TestCase
 {
@@ -78,22 +83,17 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 'Foo bar',
-                new InvalidRootException('Foo bar'),
+                new ConnectionClosedException('Foo bar'),
             ],
             [
                 UserException::class,
                 'Foo bar',
-                new ConnectionErrorException('Foo bar'),
+                new UnableToReadFile('Foo bar'),
             ],
             [
                 UserException::class,
-                'Foo bar',
-                new FileNotFoundException('Foo bar'),
-            ],
-            [
-                UserException::class,
-                'Could not login with username: foo bar',
-                new ConnectionErrorException('Could not login with username: foo bar'),
+                'Unable to login/authenticate with FTP',
+                new UnableToAuthenticate(),
             ],
             [
                 UserException::class,
@@ -101,11 +101,6 @@ class ExceptionConverterTest extends TestCase
                 new RuntimeException(
                     'php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known',
                 ),
-            ],
-            [
-                UserException::class,
-                'Could not connect to server to verify public key.',
-                new ConnectionRuntimeException('Could not connect to server to verify public key.'),
             ],
             [
                 UserException::class,
@@ -120,12 +115,7 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 'Root is invalid or does not exist: /foo/bar',
-                new InvalidRootException('Root is invalid or does not exist: /foo/bar'),
-            ],
-            [
-                UserException::class,
-                'Foo bar',
-                new ConnectionErrorException('Foo bar'),
+                new InvalidArgumentException('Root is invalid or does not exist: /foo/bar'),
             ],
             [
                 ApplicationException::class,
@@ -151,8 +141,8 @@ class ExceptionConverterTest extends TestCase
         return [
             [
                 UserException::class,
-                sprintf('Error while trying to download file: File not found at path: %s', $filePath),
-                new FileNotFoundException($filePath),
+                sprintf('Error while trying to download file: %s', $filePath),
+                new UnableToReadFile($filePath),
             ],
             [
                 UserException::class,

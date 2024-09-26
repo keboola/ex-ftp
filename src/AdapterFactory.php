@@ -4,82 +4,82 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor;
 
-use Keboola\Component\UserException;
-use League\Flysystem\Adapter\AbstractAdapter;
-use League\Flysystem\Adapter\Ftp;
-use League\Flysystem\Sftp\SftpAdapter;
-use Psr\Log\LoggerInterface;
-use Retry\BackOff\ExponentialBackOffPolicy;
-use Retry\Policy\SimpleRetryPolicy;
-use Retry\RetryProxy;
+use InvalidArgumentException;
+use League\Flysystem\FilesystemAdapter;
+use League\Flysystem\Ftp\FtpAdapter;
+use League\Flysystem\Ftp\FtpConnectionException;
+use League\Flysystem\Ftp\FtpConnectionOptions;
+use League\Flysystem\Ftp\FtpConnectionProvider;
+use League\Flysystem\Ftp\NoopCommandConnectivityChecker;
+use League\Flysystem\PhpseclibV3\SftpAdapter;
+use League\Flysystem\PhpseclibV3\SftpConnectionProvider;
+use League\Flysystem\PhpseclibV3\SimpleConnectivityChecker;
 
 class AdapterFactory
 {
-    public static function getAdapter(Config $config, LoggerInterface $logger): AbstractAdapter
+    public static function getAdapter(Config $config): FilesystemAdapter
     {
-        switch ($config->getConnectionType()) {
-            case ConfigDefinition::CONNECTION_TYPE_FTP:
-                return static::createFtpAdapter($config);
-            case ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT:
-                return static::createSslFtpImplicitAdapter($config);
-            case ConfigDefinition::CONNECTION_TYPE_SFTP:
-                return static::createSftpAdapter($config, $logger);
-            default:
-                throw new \InvalidArgumentException("Specified adapter not found");
+        return match ($config->getConnectionType()) {
+            ConfigDefinition::CONNECTION_TYPE_FTP => new FtpAdapter(self::createFtpAdapter($config)),
+            ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT => new FtpAdapter(self::createFtpAdapter($config, true)),
+            ConfigDefinition::CONNECTION_TYPE_SFTP => new SftpAdapter(
+                self::createSftpAdapter($config),
+                '/',
+            ),
+            default => throw new InvalidArgumentException('Specified adapter not found'),
+        };
+    }
+
+    /**
+     * @throws FtpConnectionException
+     */
+    public static function checkConnectivity(Config $config): bool
+    {
+        return match ($config->getConnectionType()) {
+            ConfigDefinition::CONNECTION_TYPE_FTP => self::checkFtpConnectivity($config),
+            ConfigDefinition::CONNECTION_TYPE_SSL_EXPLICIT => self::checkFtpConnectivity($config, true),
+            ConfigDefinition::CONNECTION_TYPE_SFTP => self::checkSftpConnectivity($config),
+            default => throw new InvalidArgumentException('Specified adapter not found'),
+        };
+    }
+
+    /**
+     * @throws FtpConnectionException
+     */
+    private static function checkFtpConnectivity(Config $config, bool $ssl = false): bool
+    {
+        $connectionProvider = new FtpConnectionProvider();
+        $checker = new NoopCommandConnectivityChecker();
+
+        return $checker->isConnected(
+            $connectionProvider->createConnection(self::createFtpAdapter($config, $ssl)),
+        );
+    }
+
+    private static function checkSftpConnectivity(Config $config): bool
+    {
+        $connectionProvider = self::createSftpAdapter($config);
+        $checker = new SimpleConnectivityChecker(true);
+        return $checker->isConnected($connectionProvider->provideConnection());
+    }
+
+    private static function createFtpAdapter(Config $config, bool $ssl = false): FtpConnectionOptions
+    {
+        if ($ssl) {
+            return FtpConnectionOptions::fromArray(array_merge($config->getConnectionConfig(), ['ssl' => true]));
         }
+        return FtpConnectionOptions::fromArray($config->getConnectionConfig());
     }
 
-    private static function createFtpAdapter(Config $config): AbstractAdapter
-    {
-        return new Ftp(
-            $config->getConnectionConfig()
-        );
-    }
-
-    private static function createSslFtpImplicitAdapter(Config $config): AbstractAdapter
-    {
-        return new Ftp(
-            array_merge($config->getConnectionConfig(), ['ssl' => true])
-        );
-    }
-
-    private static function createSftpAdapter(Config $config, LoggerInterface $logger): AbstractAdapter
+    private static function createSftpAdapter(Config $config): SftpConnectionProvider
     {
         if ($config->getPrivateKey() === '') {
-            $adapter = new SftpAdapter($config->getConnectionConfig());
+            return SftpConnectionProvider::fromArray($config->getConnectionConfig());
         } else {
-            $adapter = new  SftpAdapter(
-                array_merge($config->getConnectionConfig(), ['privateKey' => $config->getPrivateKey()])
-            );
-        }
-        static::setSftpRoot($adapter, $config->getPathToCopy(), $logger);
-        return $adapter;
-    }
-
-    private static function setSftpRoot(SftpAdapter $adapter, string $sourcePath, LoggerInterface $logger): void
-    {
-        if (substr($sourcePath, 0, 1) === '/') {
-            $adapter->setRoot('/');
-            return;
-        }
-
-        $retryProxy = new RetryProxy(
-            new SimpleRetryPolicy(FtpExtractor::CONNECTION_RETRIES),
-            new ExponentialBackOffPolicy(FtpExtractor::RETRY_BACKOFF),
-            $logger
-        );
-
-        try {
-            $pwd = $retryProxy->call(function () use ($adapter): string {
-                return $adapter->getConnection()->pwd();
-            });
-            $adapter->setRoot($pwd);
-        } catch (\RuntimeException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\LogicException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
-        } catch (\ErrorException $e) {
-            throw new UserException($e->getMessage(), $e->getCode(), $e);
+            return SftpConnectionProvider::fromArray(array_merge(
+                $config->getConnectionConfig(),
+                ['privateKey' => $config->getPrivateKey()],
+            ));
         }
     }
 }
