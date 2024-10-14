@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor\Tests;
 
-use Keboola\Component\UserException;
 use Keboola\FtpExtractor\AdapterFactory;
 use Keboola\FtpExtractor\Config;
 use Keboola\FtpExtractor\ConfigDefinition;
 use League\Flysystem\Ftp\FtpAdapter;
 use League\Flysystem\PhpseclibV3\SftpAdapter;
+use League\Flysystem\PhpseclibV3\UnableToConnectToSftpHost;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
@@ -44,24 +44,23 @@ class AdapterFactoryTest extends TestCase
 
     public function testInvalidSftpAdapterWithRelativePath(): void
     {
-        $this->markTestSkipped();
-//        $config = new Config(
-//            [
-//                'parameters' => [
-//                    'host' => 'ftp',
-//                    'username' => 'ftpuser',
-//                    '#password' => 'userpass',
-//                    'port' => 21,
-//                    'path' => 'rel',
-//                    'connectionType' => 'SFTP',
-//                    'timeout' => 1,
-//                ],
-//            ],
-//            new ConfigDefinition(),
-//        );
-//        $this->expectException(UserException::class);
-//        $this->expectExceptionMessageMatches('/Could not login/');
-//        AdapterFactory::checkConnectivity($config);
+        $config = new Config(
+            [
+                'parameters' => [
+                    'host' => 'ftp',
+                    'username' => 'ftpuser',
+                    '#password' => 'userpass',
+                    'port' => 21,
+                    'path' => 'rel',
+                    'connectionType' => 'SFTP',
+                    'timeout' => 1,
+                ],
+            ],
+            new ConfigDefinition(),
+        );
+        $this->expectException(UnableToConnectToSftpHost::class);
+        $this->expectExceptionMessageMatches('/Unable to connect to host/');
+        AdapterFactory::checkConnectivity($config);
     }
 
     private function provideTestConfig(string $connectionType): Config

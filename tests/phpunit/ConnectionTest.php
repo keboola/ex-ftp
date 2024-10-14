@@ -38,10 +38,19 @@ class ConnectionTest extends TestCase
             $extractor->copyFiles('source', 'destination');
         } catch (Throwable $e) {
             $this->assertInstanceOf(UserException::class, $e);
+            $this->assertCount(2, $handler->getRecords());
             $this->assertMatchesRegularExpression(
-                '/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Unable to connect to)/',
+                '/(getaddrinfo failed)|(Unable to connect to)/',
                 $e->getMessage(),
             );
+        }
+
+        foreach ($handler->getRecords() as $count => $record) {
+            $this->assertMatchesRegularExpression(
+                '/(Could not login)|(getaddrinfo for)|(Could not connect to)|(Unable to connect)/',
+                $record['message'],
+            );
+            $this->assertMatchesRegularExpression(sprintf('/Retrying\.\.\. \[%dx\]$/', $count+1), $record['message']);
         }
     }
 

@@ -9,6 +9,7 @@ use InvalidArgumentException;
 use Keboola\Component\UserException;
 use League\Flysystem\FilesystemException;
 use League\Flysystem\Ftp\UnableToAuthenticate;
+use League\Flysystem\PhpseclibV3\UnableToConnectToSftpHost;
 use League\Flysystem\UnableToReadFile;
 use phpseclib3\Exception\ConnectionClosedException;
 use Throwable;
@@ -56,6 +57,10 @@ final class ExceptionConverter
         }
 
         if ($e instanceof InvalidArgumentException) {
+            self::toUserException($e);
+        }
+
+        if ($e instanceof UnableToConnectToSftpHost) {
             self::toUserException($e);
         }
 
