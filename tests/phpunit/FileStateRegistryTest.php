@@ -18,7 +18,7 @@ class FileStateRegistryTest extends TestCase
             $this->assertSame(
                 $file['expected'],
                 $registry->shouldBeFileUpdated($file['name'], $file['timestamp']),
-                sprintf("Bad decision for %s with timestamp %s", $file['name'], $file['timestamp'])
+                sprintf('Bad decision for %s with timestamp %s', $file['name'], $file['timestamp']),
             );
         }
     }
