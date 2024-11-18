@@ -335,7 +335,6 @@ class ConfigTest extends TestCase
             'timeout' => 60,
             'recurseManually' => false,
             'ignorePassiveAddress' => false,
-            'useRawListOptions' => true,
             'timestampsOnUnixListingsEnabled' => true,
         ];
 
