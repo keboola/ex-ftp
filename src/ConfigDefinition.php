@@ -8,17 +8,18 @@ use Keboola\Component\Config\BaseConfigDefinition;
 use Symfony\Component\Config\Definition\Builder\ArrayNodeDefinition;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
+use function PHPUnit\Framework\matches;
 
 class ConfigDefinition extends BaseConfigDefinition
 {
-    public const string CONNECTION_TYPE_FTP = 'FTP';
-    public const string CONNECTION_TYPE_SSL_EXPLICIT = 'FTPS';
-    public const string CONNECTION_TYPE_SFTP = 'SFTP';
+    public const CONNECTION_TYPE_FTP = 'FTP';
+    public const CONNECTION_TYPE_SSL_EXPLICIT = 'FTPS';
+    public const CONNECTION_TYPE_SFTP = 'SFTP';
 
-    public const string LISTING_RECURSION = 'recursion';
-    public const string LISTING_MANUAL = 'manual';
+    public const LISTING_RECURSION = 'recursion';
+    public const LISTING_MANUAL = 'manual';
 
-    private const array SSH_REQUIRED_PARAMS = [
+    private const SSH_REQUIRED_PARAMS = [
         'user',
         'sshHost',
         'sshPort',
@@ -42,7 +43,7 @@ class ConfigDefinition extends BaseConfigDefinition
                 throw new InvalidConfigurationException(sprintf(
                     'Hostname "%s" with port "%s" is not approved.',
                     $v['parameters']['host'],
-                    $v['parameters']['port'],
+                    $v['parameters']['port']
                 ));
             }
             return $v;
@@ -93,7 +94,7 @@ class ConfigDefinition extends BaseConfigDefinition
                             if (!array_key_exists($param, $val)) {
                                 throw new InvalidConfigurationException(sprintf(
                                     'The child config "%s" under "root.parameters.ssh" must be configured.',
-                                    $param,
+                                    $param
                                 ));
                             }
                         }
@@ -123,7 +124,7 @@ class ConfigDefinition extends BaseConfigDefinition
 
                                 if (count($matches) !== 3) {
                                     throw new InvalidConfigurationException(
-                                        'The "passivePortRange" has invalid format.',
+                                        'The "passivePortRange" has invalid format.'
                                     );
                                 }
 
@@ -132,7 +133,7 @@ class ConfigDefinition extends BaseConfigDefinition
 
                                 if ($rangeTo < $rangeFrom) {
                                     throw new InvalidConfigurationException(
-                                        'The Range From must be less than Range To.',
+                                        'The Range From must be less than Range To.'
                                     );
                                 }
 
@@ -155,8 +156,8 @@ class ConfigDefinition extends BaseConfigDefinition
                                         self::CONNECTION_TYPE_FTP,
                                         self::CONNECTION_TYPE_SSL_EXPLICIT,
                                         self::CONNECTION_TYPE_SFTP,
-                                    ]),
-                                ),
+                                    ])
+                                )
                             )
                         ->end()
                 ->end()

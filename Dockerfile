@@ -1,4 +1,4 @@
-FROM php:8.3-cli
+FROM php:7.4-cli
 
 ARG COMPOSER_FLAGS="--prefer-dist --no-interaction"
 ARG DEBIAN_FRONTEND=noninteractive
@@ -15,13 +15,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ssh \
         git \
         unzip \
-        libssl-dev \
 	&& rm -r /var/lib/apt/lists/* \
 	&& chmod +x /tmp/composer-install.sh \
 	&& /tmp/composer-install.sh
-
-RUN docker-php-ext-configure ftp --with-openssl-dir=/usr \
-    && docker-php-ext-install ftp
 
 ## Composer - deps always cached unless changed
 # First copy only composer files

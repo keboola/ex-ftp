@@ -7,50 +7,54 @@ namespace Keboola\FtpExtractor\Tests;
 use Keboola\Component\UserException;
 use Keboola\FtpExtractor\FileStateRegistry;
 use Keboola\FtpExtractor\FtpExtractor;
+use League\Flysystem\Adapter\AbstractFtpAdapter;
+use League\Flysystem\Adapter\Ftp;
 use League\Flysystem\Filesystem;
-use League\Flysystem\FilesystemAdapter;
-use League\Flysystem\Ftp\FtpAdapter;
-use League\Flysystem\Ftp\FtpConnectionOptions;
-use League\Flysystem\PhpseclibV3\ConnectionProvider;
-use League\Flysystem\PhpseclibV3\SftpAdapter;
-use League\Flysystem\PhpseclibV3\SftpConnectionProvider;
+use League\Flysystem\Sftp\SftpAdapter;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
 use PHPUnit\Framework\TestCase;
-use Throwable;
 
 class ConnectionTest extends TestCase
 {
     /**
      * @dataProvider invalidConnectionProvider
      */
-    public function testFalseConnection(FilesystemAdapter $adapter): void
+    public function testFalseConnection(AbstractFtpAdapter $adapter): void
     {
         $handler = new TestHandler();
         $extractor = new FtpExtractor(
             false,
             new Filesystem($adapter),
             new FileStateRegistry([]),
-            (new Logger('ftpExtractorTest'))->pushHandler($handler),
+            (new Logger('ftpExtractorTest'))->pushHandler($handler)
         );
 
         try {
             $extractor->copyFiles('source', 'destination');
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             $this->assertInstanceOf(UserException::class, $e);
-            $this->assertCount(2, $handler->getRecords());
+            $this->assertCount(3, $handler->getRecords());
             $this->assertMatchesRegularExpression(
-                '/(getaddrinfo failed)|(Unable to connect to)/',
-                $e->getMessage(),
+                '/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)/',
+                $e->getMessage()
             );
-        }
 
-        foreach ($handler->getRecords() as $count => $record) {
-            $this->assertMatchesRegularExpression(
-                '/(Could not login)|(getaddrinfo for)|(Could not connect to)|(Unable to connect)/',
-                $record['message'],
-            );
-            $this->assertMatchesRegularExpression(sprintf('/Retrying\.\.\. \[%dx\]$/', $count+1), $record['message']);
+            foreach ($handler->getRecords() as $count => $record) {
+                if ($count === 0) {
+                    $this->assertEquals(
+                        sprintf('Connecting to host "%s" on port "%s".', $adapter->getHost(), $adapter->getPort()),
+                        $record['message']
+                    );
+                    continue;
+                }
+
+                $this->assertMatchesRegularExpression(
+                    '/(Could not login)|(getaddrinfo failed)|(Could not connect to)|(Cannot connect to)/',
+                    $record['message']
+                );
+                $this->assertMatchesRegularExpression(sprintf('/Retrying\.\.\. \[%dx\]$/', $count), $record['message']);
+            }
         }
     }
 
@@ -59,62 +63,62 @@ class ConnectionTest extends TestCase
     {
         return [
             'ftp-non-existing-server' => [
-                new FtpAdapter(FtpConnectionOptions::fromArray([
+                new Ftp([
                     'host' => 'localhost',
                     'username' => 'bob',
                     'password' => 'marley',
                     'port' => 21,
-                ])),
+                ]),
             ],
             'ftps-non-existing-server' => [
-                new FtpAdapter(FtpConnectionOptions::fromArray([
+                new Ftp([
                     'host' => 'localhost',
                     'username' => 'bob',
                     'password' => 'marley',
                     'port' => 21,
-                    'ssl' => true,
-                ])),
+                    'ssl' => 1,
+                ]),
             ],
             'sftp-non-existing-server' => [
-                new SftpAdapter(SftpConnectionProvider::fromArray([
+                new SftpAdapter([
                     'host' => 'localhost',
                     'username' => 'bob',
                     'password' => 'marley',
                     'port' => 22,
-                ]), '/'),
+                ]),
             ],
             'sftp-non-existing-host' => [
-                new SftpAdapter(SftpConnectionProvider::fromArray([
+                new SftpAdapter([
                     'host' => 'non-existing-host.keboola',
                     'username' => 'bob',
                     'password' => 'marley',
                     'port' => 22,
-                ]), '/'),
+                ]),
             ],
             'sftp-non-existing-server-and-port' => [
-                new SftpAdapter(SftpConnectionProvider::fromArray([
+                new SftpAdapter([
                     'host' => 'non-existing-host.keboola',
                     'username' => 'bob',
                     'password' => 'marley',
                     'port' => 220,
                     'path' => 'non-exists',
-                ]), '/'),
+                ]),
             ],
             'ftp-non-existing-host' => [
-                new FtpAdapter(FtpConnectionOptions::fromArray([
+                new Ftp([
                     'host' => 'non-existing-host.keboola',
                     'username' => 'bob',
                     'password' => 'marley',
                     'port' => 21,
-                ])),
+                ]),
             ],
             'ftp-non-existing-host-and-port' => [
-                new FtpAdapter(FtpConnectionOptions::fromArray([
+                new Ftp([
                     'host' => 'non-existing-host.keboola',
                     'username' => 'bob',
                     'password' => 'marley',
                     'port' => 50000,
-                ])),
+                ]),
             ],
         ];
     }

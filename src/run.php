@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Keboola\Component\Logger;
 use Keboola\Component\UserException;
+use Keboola\Component\Logger;
 use Keboola\FtpExtractor\FtpExtractorComponent;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -16,7 +16,7 @@ try {
 } catch (UserException $e) {
     $logger->error($e->getMessage());
     exit(1);
-} catch (Throwable $e) {
+} catch (\Throwable $e) {
     $previous = $e->getPrevious();
     $logger->critical(
         get_class($e) . ':' . $e->getMessage(),
@@ -26,7 +26,7 @@ try {
             'errCode' => $e->getCode(),
             'errTrace' => $e->getTraceAsString(),
             'errPrevious' => $previous ? get_class($previous) : '',
-        ],
+        ]
     );
     exit(2);
 }

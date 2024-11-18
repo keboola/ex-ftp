@@ -6,13 +6,19 @@ namespace Keboola\FtpExtractor;
 
 class FileStateRegistry
 {
-    public const string STATE_FILE_KEY = 'ex_ftp_state';
-    public const string NEWEST_TIMESTAMP_KEY = 'newest_timestamp';
-    public const string FILES_WITH_NEWEST_TIMESTAMP_KEY = 'last_timestamp_files';
+    public const STATE_FILE_KEY = 'ex_ftp_state';
+    public const NEWEST_TIMESTAMP_KEY = 'newest_timestamp';
+    public const FILES_WITH_NEWEST_TIMESTAMP_KEY = 'last_timestamp_files';
 
-    private int $newestTimestamp;
+    /**
+     * @var int
+     */
+    private $newestTimestamp;
 
-    private array $filesWithNewestTimestamp;
+    /**
+     * @var array
+     */
+    private $filesWithNewestTimestamp;
 
     public function __construct(array $stateFile)
     {
@@ -45,11 +51,7 @@ class FileStateRegistry
         if ($this->newestTimestamp < $timestamp) {
             $this->newestTimestamp = $timestamp;
             $this->filesWithNewestTimestamp = [$remotePath];
-            return;
-        }
-
-        if ($timestamp) {
-            $this->newestTimestamp = $timestamp;
+        } else if ($this->newestTimestamp = $timestamp) {
             $this->filesWithNewestTimestamp[] = $remotePath;
         }
     }

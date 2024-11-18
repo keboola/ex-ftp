@@ -40,7 +40,7 @@ class ConfigTest extends TestCase
         }
         $config = new Config(
             $configArray,
-            new ConfigDefinition(),
+            new ConfigDefinition()
         );
         $this->assertSame($recurseManually, $config->getConnectionConfig()['recurseManually']);
     }
@@ -63,7 +63,7 @@ class ConfigTest extends TestCase
 
         new Config(
             $configArray,
-            new ConfigDefinition(),
+            new ConfigDefinition()
         );
     }
 
@@ -112,7 +112,7 @@ class ConfigTest extends TestCase
 
         Assert::assertEquals($configArray, $config->getData());
     }
-
+    
     /**
      * @dataProvider invalidApprovedHostnameDataProvider
      */
@@ -136,7 +136,7 @@ class ConfigTest extends TestCase
         $this->expectExceptionMessage('Hostname "hostName" with port "21" is not approved.');
         new Config(
             $configArray,
-            new ConfigDefinition(),
+            new ConfigDefinition()
         );
     }
 
@@ -163,7 +163,7 @@ class ConfigTest extends TestCase
 
         $config = new Config(
             $configArray,
-            new ConfigDefinition(),
+            new ConfigDefinition()
         );
 
         $this->assertEquals(Config::class, get_class($config));
@@ -171,21 +171,21 @@ class ConfigTest extends TestCase
 
     public function invalidApprovedHostnameDataProvider(): Generator
     {
-        yield 'invalid-host' => [
+        yield "invalid-host" => [
             [
                 'host' => 'invalidHost',
                 'port' => 21,
             ],
         ];
 
-        yield 'invalid-port' => [
+        yield "invalid-port" => [
             [
                 'host' => 'hostName',
                 'port' => 22,
             ],
         ];
 
-        yield 'invalid-both' => [
+        yield "invalid-both" => [
             [
                 'host' => 'invalidHost',
                 'port' => 22,

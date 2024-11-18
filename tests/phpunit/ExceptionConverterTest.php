@@ -4,19 +4,14 @@ declare(strict_types=1);
 
 namespace Keboola\FtpExtractor\Tests;
 
-use ErrorException;
-use InvalidArgumentException;
-use Keboola\Component\UserException;
 use Keboola\FtpExtractor\Exception\ApplicationException;
-use Keboola\FtpExtractor\Exception\ExceptionConverter;
-use League\Flysystem\FilesystemException;
-use League\Flysystem\Ftp\FtpConnectionException;
-use League\Flysystem\Ftp\UnableToAuthenticate;
-use League\Flysystem\UnableToReadFile;
-use phpseclib3\Exception\ConnectionClosedException;
+use League\Flysystem\ConnectionRuntimeException;
+use League\Flysystem\Sftp\ConnectionErrorException;
+use League\Flysystem\Sftp\InvalidRootException;
 use PHPUnit\Framework\TestCase;
-use RuntimeException;
-use Throwable;
+use Keboola\FtpExtractor\Exception\ExceptionConverter;
+use League\Flysystem\FileNotFoundException;
+use Keboola\Component\UserException;
 
 class ExceptionConverterTest extends TestCase
 {
@@ -27,14 +22,14 @@ class ExceptionConverterTest extends TestCase
     public function testHandleCopyFilesException(
         string $expectedException,
         string $expectedExceptionMessage,
-        Throwable $throwException,
+        \Throwable $throwException
     ): void {
         $this->expectException($expectedException);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
             throw $throwException;
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             ExceptionConverter::handleCopyFilesException($e);
         }
     }
@@ -46,14 +41,14 @@ class ExceptionConverterTest extends TestCase
     public function testHandlePrepareToDownloadException(
         string $expectedException,
         string $expectedExceptionMessage,
-        Throwable $throwException,
+        \Throwable $throwException
     ): void {
         $this->expectException($expectedException);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
             throw $throwException;
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             ExceptionConverter::handlePrepareToDownloadException($e);
         }
     }
@@ -65,14 +60,14 @@ class ExceptionConverterTest extends TestCase
     public function testHandleDownloadException(
         string $expectedException,
         string $expectedExceptionMessage,
-        Throwable $throwException,
+        \Throwable $throwException
     ): void {
         $this->expectException($expectedException);
         $this->expectExceptionMessage($expectedExceptionMessage);
 
         try {
             throw $throwException;
-        } catch (Throwable $e) {
+        } catch (\Throwable $e) {
             ExceptionConverter::handleDownloadException($e);
         }
     }
@@ -83,52 +78,67 @@ class ExceptionConverterTest extends TestCase
             [
                 UserException::class,
                 'Foo bar',
-                new ConnectionClosedException('Foo bar'),
+                new InvalidRootException('Foo bar'),
             ],
             [
                 UserException::class,
                 'Foo bar',
-                new UnableToReadFile('Foo bar'),
+                new ConnectionErrorException('Foo bar'),
             ],
             [
                 UserException::class,
-                'Unable to login/authenticate with FTP',
-                new UnableToAuthenticate(),
+                'Foo bar',
+                new FileNotFoundException('Foo bar'),
+            ],
+            [
+                UserException::class,
+                'Could not login with username: foo bar',
+                new ConnectionErrorException('Could not login with username: foo bar'),
             ],
             [
                 UserException::class,
                 'php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known',
-                new RuntimeException(
-                    'php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known',
+                new \RuntimeException(
+                    'php_network_getaddresses: getaddrinfo failed: nodename nor servname provided, or not known'
                 ),
             ],
             [
                 UserException::class,
+                'Could not connect to server to verify public key.',
+                new ConnectionRuntimeException('Could not connect to server to verify public key.'),
+            ],
+            [
+                UserException::class,
                 'The authenticity of host foo can\'t be established.',
-                new RuntimeException('The authenticity of host foo can\'t be established.'),
+                new \RuntimeException('The authenticity of host foo can\'t be established.'),
             ],
             [
                 UserException::class,
                 'Cannot connect to foo bar',
-                new RuntimeException('Cannot connect to foo bar'),
+                new \RuntimeException('Cannot connect to foo bar'),
             ],
             [
                 UserException::class,
                 'Root is invalid or does not exist: /foo/bar',
-                new InvalidArgumentException('Root is invalid or does not exist: /foo/bar'),
+                new InvalidRootException('Root is invalid or does not exist: /foo/bar'),
+            ],
+            [
+                UserException::class,
+                'Foo bar',
+                new ConnectionErrorException('Foo bar'),
             ],
             [
                 ApplicationException::class,
                 'Foo bar',
-                new RuntimeException('Foo bar'),
+                new \RuntimeException('Foo bar'),
             ],
             [
                 UserException::class,
                 sprintf(
                     'Connection was terminated. Check that the connection is not blocked by Firewall ' .
-                    'or set ignore passive address: Operation now in progress (115)',
+                    'or set ignore passive address: Operation now in progress (115)'
                 ),
-                new ErrorException('Operation now in progress (115)'),
+                new \ErrorException('Operation now in progress (115)'),
             ],
         ];
     }
@@ -141,53 +151,53 @@ class ExceptionConverterTest extends TestCase
         return [
             [
                 UserException::class,
-                sprintf('Error while trying to download file: %s', $filePath),
-                new UnableToReadFile($filePath),
+                sprintf('Error while trying to download file: File not found at path: %s', $filePath),
+                new FileNotFoundException($filePath),
             ],
             [
                 UserException::class,
                 sprintf(
                     'Connection was terminated. Check that the connection is not blocked by Firewall ' .
                     'or set ignore passive address: %s',
-                    $progressMessage,
+                    $progressMessage
                 ),
-                new ErrorException($progressMessage),
+                new \ErrorException($progressMessage),
             ],
             [
                 ApplicationException::class,
                 'Foo Bar',
-                new ErrorException('Foo Bar'),
+                new \ErrorException('Foo Bar'),
             ],
             [
                 ApplicationException::class,
                 'Foo Bar',
-                new RuntimeException('Foo Bar'),
+                new \RuntimeException('Foo Bar'),
             ],
             [
                 UserException::class,
                 'Connection timed out. Check your timeout configuration, server health and try again.',
-                new ErrorException('ftp_rawlist(): Connection timed out'),
+                new \ErrorException('ftp_rawlist(): Connection timed out'),
             ],
             [
                 UserException::class,
                 'Connection timed out. Check your timeout configuration, server health and try again.',
-                new ErrorException('ftp_mdtm(): Connection timed out'),
+                new \ErrorException('ftp_mdtm(): Connection timed out'),
             ],
             [
                 UserException::class,
                 'SSL/TLS handshake failed. Check your credentials, SSL/TLS configuration and make sure the ' .
                 'certificate is valid and is not expired.',
-                new ErrorException('ftp_rawlist(): data_accept: SSL/TLS handshake failed'),
+                new \ErrorException('ftp_rawlist(): data_accept: SSL/TLS handshake failed'),
             ],
             [
                 UserException::class,
                 'Expected SSH_FXP_ATTRS or SSH_FXP_STATUS',
-                new ErrorException('Expected SSH_FXP_ATTRS or SSH_FXP_STATUS'),
+                new \ErrorException('Expected SSH_FXP_ATTRS or SSH_FXP_STATUS'),
             ],
             [
                 UserException::class,
                 'Expected SSH_FXP_VERSION',
-                new ErrorException('Expected SSH_FXP_VERSION'),
+                new \ErrorException('Expected SSH_FXP_VERSION'),
             ],
         ];
     }
