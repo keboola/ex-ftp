@@ -105,7 +105,7 @@ class FtpExtractor
             $timestamp = 0;
             if ($this->onlyNewFiles) {
                 try {
-                    $timestamp = $this->createRetryProxy()->call(function () use ($item): int {
+                    $timestamp = $item->lastModified() ?? $this->createRetryProxy()->call(function () use ($item): int {
                         return (int) $this->ftpFilesystem->getTimestamp($item['path']);
                     });
                     if (!$this->registry->shouldBeFileUpdated($item['path'], $timestamp)) {
