@@ -14,9 +14,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Build image and run tests
         run: |
-          docker-compose -v
-          docker-compose build
-          docker-compose run app composer ci
+          docker compose -v
+          docker compose build app
+          docker compose run app composer ci
       - name: Push test image to ECR
         run: |
           docker pull quay.io/keboola/developer-portal-cli-v2:latest
