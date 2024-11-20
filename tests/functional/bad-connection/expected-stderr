@@ -1,1 +1,1 @@
-Unable to connect to host ftp-bad at port 21. ftp_connect(): %s
+Could not connect to host: ftp-bad, port:21

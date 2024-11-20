@@ -1,24 +1,23 @@
 {
     "require": {
-        "php": "^8.3",
-        "keboola/php-component": "^10.1",
-        "keboola/retry": "^0.5.1",
-        "keboola/sanitizer": "^0.1.1",
-        "keboola/ssh-tunnel": "^2.1",
-        "league/flysystem": "^3.28",
-        "league/flysystem-ftp": "^3.28",
-        "league/flysystem-sftp-v3": "^3.28",
-        "webmozart/glob": "^4.7"
+        "php": "^7.4",
+        "keboola/php-component": "^8.0",
+        "keboola/retry": "^0.5.0",
+        "keboola/sanitizer": "^0.1.0",
+        "keboola/ssh-tunnel": "^2.0",
+        "league/flysystem": "^1.1",
+        "league/flysystem-sftp": "^1.1",
+        "webmozart/glob": "^4.3"
     },
     "require-dev": {
-        "keboola/coding-standard": "^15.0",
-        "keboola/csv": "^4.1",
-        "keboola/datadir-tests": "^5.6",
+        "php-parallel-lint/php-parallel-lint": "^1.2",
+        "keboola/csv": "^2.0",
+        "keboola/coding-standard": "^4.0",
         "keboola/php-temp": "^2.0",
-        "php-parallel-lint/php-parallel-lint": "^1.4",
-        "phpstan/phpstan": "^1.12",
-        "phpunit/phpunit": "^9.6",
-        "symfony/process": "^5.4"
+        "phpstan/phpstan": "^0.12.14",
+        "phpunit/phpunit": "^9.0",
+        "symfony/process": "^5.0",
+        "keboola/datadir-tests": "^5.2"
     },
     "autoload": {
         "psr-4": {
@@ -56,9 +55,6 @@
     },
     "config": {
         "sort-packages": true,
-        "optimize-autoloader": true,
-        "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
-        }
+        "optimize-autoloader": true
     }
 }

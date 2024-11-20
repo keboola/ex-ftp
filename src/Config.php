@@ -8,7 +8,7 @@ use Keboola\Component\Config\BaseConfig;
 
 class Config extends BaseConfig
 {
-    public const int SSH_PORT = 22;
+    public const SSH_PORT = 22;
 
     private string $host;
 
@@ -24,53 +24,52 @@ class Config extends BaseConfig
             'timeout' => $this->getValue(['parameters', 'timeout']),
             'recurseManually' => $this->shouldUseManualRecursion(),
             'ignorePassiveAddress' => $this->ignorePassiveAddress(),
-            'useRawListOptions' => true,
         ];
     }
 
     public function getConnectionType(): string
     {
-        return $this->getStringValue(['parameters', 'connectionType']);
+        return $this->getValue(['parameters', 'connectionType']);
     }
 
     public function getPathToCopy(): string
     {
-        return $this->getStringValue(['parameters', 'path']);
+        return $this->getValue(['parameters', 'path']);
     }
 
     public function isOnlyForNewFiles(): bool
     {
-        return $this->getBoolValue(['parameters', 'onlyNewFiles']);
+        return $this->getValue(['parameters', 'onlyNewFiles']);
     }
 
     public function skipFileNotFound(): bool
     {
-        return $this->getBoolValue(['parameters', 'skipFileNotFound']);
+        return $this->getValue(['parameters', 'skipFileNotFound']);
     }
 
     public function getPrivateKey(): string
     {
-        return $this->getStringValue(['parameters', '#privateKey']);
+        return $this->getValue(['parameters', '#privateKey']);
     }
 
     private function shouldUseManualRecursion(): bool
     {
-        return $this->getStringValue(['parameters', 'listing']) === ConfigDefinition::LISTING_MANUAL;
+        return $this->getValue(['parameters', 'listing']) === ConfigDefinition::LISTING_MANUAL;
     }
 
     public function ignorePassiveAddress(): bool
     {
-        return $this->getBoolValue(['parameters', 'ignorePassiveAddress']);
+        return $this->getValue(['parameters', 'ignorePassiveAddress']);
     }
 
     public function getHost(): string
     {
-        return $this->host ?? $this->getStringValue(['parameters', 'host']);
+        return $this->host ?? $this->getValue(['parameters', 'host']);
     }
 
     public function getPort(): int
     {
-        return $this->port ?? $this->getIntValue(['parameters', 'port']);
+        return $this->port ?? $this->getValue(['parameters', 'port']);
     }
 
     public function setHost(string $host): void
@@ -85,12 +84,12 @@ class Config extends BaseConfig
 
     public function isSshEnabled(): bool
     {
-        return $this->getBoolValue(['parameters', 'ssh', 'enabled'], false);
+        return $this->getValue(['parameters', 'ssh', 'enabled'], false);
     }
 
     public function getSshConfig(int $port, ?int $localPort = null): array
     {
-        $sshConfig = $this->getArrayValue(['parameters', 'ssh']);
+        $sshConfig = $this->getValue(['parameters', 'ssh']);
         $sshConfig['remoteHost'] = $this->getHost();
         $sshConfig['remotePort'] = $port;
         $sshConfig['localPort'] = $localPort ?? $port;
@@ -101,17 +100,10 @@ class Config extends BaseConfig
 
     public function getFtpPassivePorts(): array
     {
-        $portRange = $this->getStringValue(['parameters', 'ssh', 'passivePortRange']);
+        $portRange = $this->getValue(['parameters', 'ssh', 'passivePortRange']);
 
         list($rangeFrom, $rangeTo) = explode(':', $portRange);
 
         return range($rangeFrom, $rangeTo);
-    }
-
-    private function getBoolValue(array $keys, mixed $default = null): bool
-    {
-        /** @var bool $value */
-        $value = $this->getValue($keys, $default);
-        return $value;
     }
 }
