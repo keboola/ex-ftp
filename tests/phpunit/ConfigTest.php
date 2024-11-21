@@ -309,4 +309,35 @@ class ConfigTest extends TestCase
             ],
         ];
     }
+
+    public function testGetConnectionConfig(): void
+    {
+        $configArray = [
+            'parameters' => [
+                'host' => 'ftp',
+                'username' => 'ftpuser',
+                '#password' => 'userpass',
+                'port' => 21,
+                'path' => 'rel',
+                'connectionType' => 'SFTP',
+            ],
+        ];
+        $config = new Config(
+            $configArray,
+            new ConfigDefinition(),
+        );
+
+        $expectedConnectionConfig = [
+            'host' => 'ftp',
+            'port' => 21,
+            'username' => 'ftpuser',
+            'password' => 'userpass',
+            'timeout' => 60,
+            'recurseManually' => false,
+            'ignorePassiveAddress' => false,
+            'enableTimestampsOnUnixListings' => true,
+        ];
+
+        $this->assertSame($expectedConnectionConfig, $config->getConnectionConfig());
+    }
 }

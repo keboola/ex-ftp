@@ -24,6 +24,7 @@ class Config extends BaseConfig
             'timeout' => $this->getValue(['parameters', 'timeout']),
             'recurseManually' => $this->shouldUseManualRecursion(),
             'ignorePassiveAddress' => $this->ignorePassiveAddress(),
+            'enableTimestampsOnUnixListings' => true,
         ];
     }
 
