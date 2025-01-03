@@ -151,6 +151,7 @@ class DatadirTest extends AbstractDatadirTestCase
             JsonHelper::writeFile(__DIR__ . '/new-files-from-old-state/expected/data/out/state.json', $outputState);
         }
 
+
         $process = $this->runScript($tempDatadir->getTmpFolder());
 
         $this->assertMatchesSpecification($specification, $process, $tempDatadir->getTmpFolder());
