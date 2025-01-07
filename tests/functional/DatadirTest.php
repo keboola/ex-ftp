@@ -72,7 +72,7 @@ class DatadirTest extends AbstractDatadirTestCase
         // --- nothing-to-update tests ---
         $state = [
             "ex_ftp_state" => [
-                "newest_timestamp" => $this->roundTimestamp($timestamps["dir1/recursive.bin"]),
+                "newest_timestamp" => $timestamps["dir1/recursive.bin"],
                 "last_timestamp_files" => ["dir1/recursive.bin"],
             ],
         ];
@@ -106,7 +106,7 @@ class DatadirTest extends AbstractDatadirTestCase
         ];
         $outputState = [
             "ex_ftp_state" => [
-                "newest_timestamp" => $this->roundTimestamp($timestamps["file_1.txt"]),
+                "newest_timestamp" => $timestamps["file_1.txt"],
                 "last_timestamp_files" => ["file_1.txt", "Zvlášť zákeřný učeň s ďolíčky běží podél zóny úlů.csv"],
             ],
         ];
@@ -116,7 +116,7 @@ class DatadirTest extends AbstractDatadirTestCase
         // -- new-files-from-old-state test --
         $inputState = [
             "ex_ftp_state" => [
-                "newest_timestamp" => $this->roundTimestamp($timestamps["file_1.txt"]),
+                "newest_timestamp" => $timestamps["file_1.txt"],
                 "last_timestamp_files" => ["file_1.txt", "Zvlášť zákeřný učeň s ďolíčky běží podél zóny úlů.csv"],
             ],
         ];
@@ -144,7 +144,7 @@ class DatadirTest extends AbstractDatadirTestCase
             $freshTimestamp = (new SplFileInfo($newCsvFile, "", ""))->getMTime();
             $outputState = [
                 "ex_ftp_state" => [
-                    "newest_timestamp" => $this->roundTimestamp($freshTimestamp),
+                    "newest_timestamp" => $freshTimestamp,
                     "last_timestamp_files" => ["a_brand_new_file.csv"],
                 ],
             ];
@@ -159,10 +159,5 @@ class DatadirTest extends AbstractDatadirTestCase
     private function doesNameMatchDatadir(string $testName, string $datadir): bool
     {
         return in_array($testName, explode('/', $datadir));
-    }
-
-    private function roundTimestamp(int $timestamp): int
-    {
-        return (int) floor($timestamp / 60) * 60;
     }
 }
