@@ -48,9 +48,14 @@ class AdapterFactory
         if ($config->getPrivateKey() === '') {
             $adapter = new SftpAdapter($config->getConnectionConfig());
         } else {
-            $adapter = new  SftpAdapter(
-                array_merge($config->getConnectionConfig(), ['privateKey' => $config->getPrivateKey()])
+            $sftpConfig = array_merge(
+                $config->getConnectionConfig(),
+                ['privateKey' => $config->getPrivateKey()]
             );
+            if ($config->getPassphrase() !== '') {
+                $sftpConfig['passphrase'] = $config->getPassphrase();
+            }
+            $adapter = new SftpAdapter($sftpConfig);
         }
         static::setSftpRoot($adapter, $config->getPathToCopy(), $logger);
         return $adapter;

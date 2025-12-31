@@ -52,6 +52,11 @@ class Config extends BaseConfig
         return $this->getValue(['parameters', '#privateKey']);
     }
 
+    public function getPassphrase(): string
+    {
+        return $this->getValue(['parameters', '#passphrase']);
+    }
+
     private function shouldUseManualRecursion(): bool
     {
         return $this->getValue(['parameters', 'listing']) === ConfigDefinition::LISTING_MANUAL;

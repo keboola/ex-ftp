@@ -100,6 +100,7 @@ class ConfigTest extends TestCase
                 'connectionType' => 'FTP',
                 'onlyNewFiles' => false,
                 '#privateKey' => '',
+                '#passphrase' => '',
                 'timeout' => 60,
                 'listing' => 'recursion',
                 'ignorePassiveAddress' => false,
