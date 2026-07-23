@@ -71,7 +71,14 @@ class AdapterFactory
 
         try {
             $pwd = $retryProxy->call(function () use ($adapter): string {
-                return $adapter->getConnection()->pwd();
+                $workingDirectory = $adapter->getConnection()->pwd();
+                if (!is_string($workingDirectory)) {
+                    throw new \RuntimeException(
+                        'Could not determine the working directory on the SFTP server. '
+                        . 'Check the host, port, credentials and that the account has access to the server.'
+                    );
+                }
+                return $workingDirectory;
             });
             $adapter->setRoot($pwd);
         } catch (\RuntimeException $e) {
